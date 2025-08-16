@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PSYZON - Configurações</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-200">
+  <div class="flex flex-col min-h-screen">
+    
+    <header class="bg-gray-900/80 backdrop-blur-lg sticky top-0 z-40 border-b border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center">
+            <a href="index.html" class="flex-shrink-0">
+              <img src="https://www.dropbox.com/scl/fi/voa9em2o660y4ruwgwhfl/IMG_2995.png?rlkey=6ktftpckg8aioyw8lvsxqyijs&raw=1" alt="Logo Psyzon" class="h-12">
+            </a>
+          </div>
+          <div class="hidden md:block">
+            <nav class="ml-12 flex items-baseline space-x-16">
+              <a href="index.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-bold">Dashboard</a>
+              <a href="clientes.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Clientes</a>
+              <a href="processos.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Processos</a>
+              <a href="bloco_de_notas.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-bold">Bloco de Notas</a>
+              <a href="historico.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Histórico</a>
+              <a href="relatorios.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Relatórios</a>
+              <a href="configuracoes.html" class="bg-cyan-500/20 text-cyan-300 px-3 py-2 rounded-md text-sm font-medium">Configurações</a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4 md:p-6 lg:p-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold">Configurações do Sistema</h1>
+        </div>
+        <div class="space-y-8 max-w-4xl mx-auto">
+            
+            <section class="glass-card p-6">
+                    <h2 class="text-xl font-bold border-b border-white/10 pb-4 mb-4">🎯 Metas e Orçamentos Mensais</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                        <div>
+                            <label for="business-limit" class="block mb-2 text-sm font-medium text-gray-400">Orçamento de Despesas Empresariais (R$)</label>
+                            <input type="number" id="business-limit" placeholder="Ex: 5000.00" class="w-full p-2.5 rounded-md bg-white/10 border border-white/20">
+                        </div>
+                        <div>
+                            <label for="personal-limit" class="block mb-2 text-sm font-medium text-gray-400">Limite de Gastos Pessoais (R$)</label>
+                            <input type="number" id="personal-limit" placeholder="Ex: 1500.00" class="w-full p-2.5 rounded-md bg-white/10 border border-white/20">
+                        </div>
+                    </div>
+                     <div class="mt-6 text-right">
+                        <button id="save-limits-btn" class="btn-shine py-2 px-6 font-bold rounded-lg">Salvar Orçamentos</button>
+                    </div>
+            </section>
+
+            <section class="glass-card p-6">
+                    <h2 class="text-xl font-bold border-b border-white/10 pb-4 mb-6">Gerenciar Categorias</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                    <h3 class="text-lg font-semibold text-green-400 mb-3">Categorias de Receita</h3>
+                                    <ul id="income-categories-list" class="space-y-2 mb-4"> </ul>
+                                    <div class="flex gap-2">
+                                            <input type="text" id="new-income-category" placeholder="Nova categoria de receita" class="flex-grow p-2 rounded-md bg-white/10 border border-white/20">
+                                            <button id="add-income-category-btn" class="p-2 px-4 font-bold rounded-md bg-green-500/80 hover:bg-green-500">Adicionar</button>
+                                    </div>
+                            </div>
+                            <div>
+                                    <h3 class="text-lg font-semibold text-red-400 mb-3">Categorias de Despesa</h3>
+                                    <ul id="expense-categories-list" class="space-y-2 mb-4"> </ul>
+                                    <div class="flex gap-2">
+                                            <input type="text" id="new-expense-category" placeholder="Nova categoria de despesa" class="flex-grow p-2 rounded-md bg-white/10 border border-white/20">
+                                            <button id="add-expense-category-btn" class="p-2 px-4 font-bold rounded-md bg-red-500/80 hover:bg-red-500">Adicionar</button>
+                                    </div>
+                            </div>
+                    </div>
+            </section>
+
+            <section class="glass-card p-6 border border-red-500/50 bg-red-900/10">
+                    <h2 class="text-xl font-bold text-red-400 border-b border-red-500/30 pb-4 mb-4">Zona de Perigo ☣️</h2>
+                    <div class="flex items-center justify-between">
+                            <div>
+                                    <h3 class="font-bold">Limpar Todos os Dados</h3>
+                                    <p class="text-sm text-gray-400">Esta ação é irreversível. Todas as transações serão apagadas.</p>
+                            </div>
+                            <button id="clear-data-btn" class="bg-gradient-to-br from-red-600 to-red-800 text-white font-bold py-2 px-4 rounded-lg">
+                                    Limpar Transações
+                            </button>
+                    </div>
+            </section>
+        </div>
+    </main>
+  </div>
+  <script src="configuracoes.js"></script>
+    <script src="theme-toggle.js"></script>
+</body>
+</html>

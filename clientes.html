@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PSYZON - Meus Clientes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-200">
+  <div class="flex flex-col min-h-screen">
+    
+    <header class="bg-gray-900/80 backdrop-blur-lg sticky top-0 z-40 border-b border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center">
+            <a href="index.html" class="flex-shrink-0">
+              <img src="https://www.dropbox.com/scl/fi/voa9em2o660y4ruwgwhfl/IMG_2995.png?rlkey=6ktftpckg8aioyw8lvsxqyijs&raw=1" alt="Logo Psyzon" class="h-12">
+            </a>
+          </div>
+          <div class="hidden md:block">
+            <nav class="ml-10 flex items-baseline space-x-16">
+              <a href="index.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+              <a href="clientes.html" class="bg-cyan-500/20 text-cyan-300 px-3 py-2 rounded-md text-sm font-bold">Clientes</a>
+              <a href="processos.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Processos</a>
+              <a href="bloco_de_notas.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-bold">Bloco de Notas</a>
+              <a href="historico.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Histórico</a>
+              <a href="relatorios.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Relatórios</a>
+              <a href="configuracoes.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Configurações</a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4 md:p-6 lg:p-8">
+      <div class="flex justify-between items-center mb-8">
+          <h1 class="text-2xl md:text-3xl font-bold">Meus Clientes</h1>
+          <button id="add-client-btn" class="btn-shine py-2 px-6 font-bold rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600">+ Novo Cliente</button>
+      </div>
+
+      <div class="glass-card p-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div>
+            <label for="search-client" class="block mb-2 text-sm font-medium text-gray-400">Buscar por Nome</label>
+            <input type="text" id="search-client" class="w-full p-2.5 rounded-md bg-white/10 border border-white/20" placeholder="Digite o nome...">
+          </div>
+          <div>
+            <label for="sort-by" class="block mb-2 text-sm font-medium text-gray-400">Ordenar por</label>
+            <select id="sort-by" class="w-full p-3 rounded-md bg-white/10 border border-white/20">
+              <option value="name_asc">Nome (A-Z)</option>
+              <option value="profit_desc">Mais Lucrativos</option>
+            </select>
+          </div>
+          <div>
+            <label for="filter-gender" class="block mb-2 text-sm font-medium text-gray-400">Filtrar por Gênero</label>
+            <select id="filter-gender" class="w-full p-3 rounded-md bg-white/10 border border-white/20">
+              <option value="all">Todos</option>
+              <option value="male">Masculino</option>
+              <option value="female">Feminino</option>
+              <option value="other">Outro</option>
+              <option value="not_informed">Não Informado</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 md:p-6">
+        <h3 class="text-xl font-bold mb-4">Lista de Clientes</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left min-w-[700px]">
+                <thead>
+                    <tr class="border-b border-white/10">
+                    <th class="p-3">Cliente</th>
+                    <th class="p-3">Contato <span class="inline-block align-middle ml-1" aria-hidden="true">
+                      <!-- small WhatsApp icon for table header -->
+                      <svg width="14" height="14" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor">
+                        <defs><linearGradient id="wa-grad-2" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#61fd7d"/><stop offset="1" stop-color="#2bb826"/></linearGradient></defs>
+                        <path fill="url(#wa-grad-2)" d="M783.302 243.246c-69.329-69.387-161.529-107.619-259.763-107.658-202.402 0-367.133 164.668-367.214 367.072-.026 64.699 16.883 127.854 49.017 183.522l-52.096 190.229 194.665-51.047c53.636 29.244 114.022 44.656 175.482 44.682h.151c202.382 0 367.128-164.688 367.21-367.094.039-98.087-38.121-190.319-107.452-259.706z"/>
+                      </svg>
+                    </span></th>
+                    <th class="p-3">Total Faturado</th>
+                    <th class="p-3 text-cyan-300">Lucro Gerado</th>
+                    <th class="p-3">Ação</th>
+                </tr>
+                </thead>
+                <tbody id="client-list">
+                </tbody>
+            </table>
+        </div>
+      </div>
+    </main>
+
+    <div id="client-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 overflow-y-auto">
+      <div class="glass-card w-full max-w-lg my-8">
+          <form id="client-form" class="p-6">
+              <h2 id="client-modal-title" class="text-2xl font-bold mb-6">Novo Cliente</h2>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="client-name" class="block mb-2 text-sm font-medium">Nome do Cliente</label>
+                    <input type="text" id="client-name" class="w-full p-3 rounded-md bg-white/10 border border-white/20" placeholder="Nome completo" required>
+                </div>
+                <div>
+                    <label for="client-gender" class="block mb-2 text-sm font-medium">Gênero</label>
+                    <select id="client-gender" class="w-full p-3 rounded-md bg-white/10 border border-white/20">
+                        <option value="not_informed">Não Informar</option>
+                        <option value="male">Masculino</option>
+                        <option value="female">Feminino</option>
+                        <option value="other">Outro</option>
+                    </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                      <label for="client-phone" class="block mb-2 text-sm font-medium">
+                        <span class="inline-flex items-center mr-2" aria-hidden="true">
+                          <!-- WhatsApp SVG (substituído conforme solicitado) -->
+                          <svg width="18" height="18" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+                            <defs>
+                              <linearGradient id="wa-grad" x1="0" x2="1" y1="0" y2="1">
+                                <stop offset="0" stop-color="#61fd7d"></stop>
+                                <stop offset="1" stop-color="#2bb826"></stop>
+                              </linearGradient>
+                            </defs>
+                            <path fill="url(#wa-grad)" d="M1023.941 765.153c0 5.606-.171 17.766-.508 27.159-.824 22.982-2.646 52.639-5.401 66.151-4.141 20.306-10.392 39.472-18.542 55.425-9.643 18.871-21.943 35.775-36.559 50.364-14.584 14.56-31.472 26.812-50.315 36.416-16.036 8.172-35.322 14.426-55.744 18.549-13.378 2.701-42.812 4.488-65.648 5.3-9.402.336-21.564.505-27.15.505l-504.226-.081c-5.607 0-17.765-.172-27.158-.509-22.983-.824-52.639-2.646-66.152-5.4-20.306-4.142-39.473-10.392-55.425-18.542-18.872-9.644-35.775-21.944-50.364-36.56-14.56-14.584-26.812-31.471-36.415-50.314-8.174-16.037-14.428-35.323-18.551-55.744-2.7-13.378-4.487-42.812-5.3-65.649-.334-9.401-.503-21.563-.503-27.148l.08-504.228c0-5.607.171-17.766.508-27.159.825-22.983 2.646-52.639 5.401-66.151 4.141-20.306 10.391-39.473 18.542-55.426C34.154 93.24 46.455 76.336 61.07 61.747c14.584-14.559 31.472-26.812 50.315-36.416 16.037-8.172 35.324-14.426 55.745-18.549 13.377-2.701 42.812-4.488 65.648-5.3 9.402-.335 21.565-.504 27.149-.504l504.227.081c5.608 0 17.766.171 27.159.508 22.983.825 52.638 2.646 66.152 5.401 20.305 4.141 39.472 10.391 55.425 18.542 18.871 9.643 35.774 21.944 50.363 36.559 14.559 14.584 26.812 31.471 36.415 50.315 8.174 16.037 14.428 35.323 18.551 55.744 2.7 13.378 4.486 42.812 5.3 65.649.335 9.402.504 21.564.504 27.15l-.082 504.226z"/>
+                            <g fill="#FFF">
+                              <path d="M783.302 243.246c-69.329-69.387-161.529-107.619-259.763-107.658-202.402 0-367.133 164.668-367.214 367.072-.026 64.699 16.883 127.854 49.017 183.522l-52.096 190.229 194.665-51.047c53.636 29.244 114.022 44.656 175.482 44.682h.151c202.382 0 367.128-164.688 367.21-367.094.039-98.087-38.121-190.319-107.452-259.706zM523.544 808.047h-.125c-54.767-.021-108.483-14.729-155.344-42.529l-11.146-6.612-115.517 30.293 30.834-112.592-7.259-11.544c-30.552-48.579-46.688-104.729-46.664-162.379.066-168.229 136.985-305.096 305.339-305.096 81.521.031 158.154 31.811 215.779 89.482s89.342 134.332 89.312 215.859c-.066 168.243-136.984 305.118-305.209 305.118zm167.415-228.515c-9.177-4.591-54.286-26.782-62.697-29.843-8.41-3.062-14.526-4.592-20.645 4.592-6.115 9.182-23.699 29.843-29.053 35.964-5.352 6.122-10.704 6.888-19.879 2.296-9.176-4.591-38.74-14.277-73.786-45.526-27.275-24.319-45.691-54.359-51.043-63.543-5.352-9.183-.569-14.146 4.024-18.72 4.127-4.109 9.175-10.713 13.763-16.069 4.587-5.355 6.117-9.183 9.175-15.304 3.059-6.122 1.529-11.479-.765-16.07-2.293-4.591-20.644-49.739-28.29-68.104-7.447-17.886-15.013-15.466-20.645-15.747-5.346-.266-11.469-.322-17.585-.322s-16.057 2.295-24.467 11.478-32.113 31.374-32.113 76.521c0 45.147 32.877 88.764 37.465 94.885 4.588 6.122 64.699 98.771 156.741 138.502 21.892 9.45 38.982 15.094 52.308 19.322 21.98 6.979 41.982 5.995 57.793 3.634 17.628-2.633 54.284-22.189 61.932-43.615 7.646-21.427 7.646-39.791 5.352-43.617-2.294-3.826-8.41-6.122-17.585-10.714z"/>
+                            </g>
+                          </svg>
+                        </span>
+                        Telefone (WhatsApp)
+                      </label>
+                      <input type="text" id="client-phone" class="w-full p-3 rounded-md bg-white/10 border border-white/20" placeholder="Ex: 11999998888">
+                  </div>
+                  <div>
+                      <label for="client-email" class="block mb-2 text-sm font-medium">E-mail</label>
+                      <input type="email" id="client-email" class="w-full p-3 rounded-md bg-white/10 border border-white/20" placeholder="cliente@email.com">
+                  </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block mb-2 text-sm font-medium">Foto do Cliente</label>
+                    <div id="client-photo-dropzone" class="w-full h-32 flex items-center justify-center border-2 border-dashed border-gray-600 rounded-lg text-gray-400 cursor-pointer hover:bg-white/5 hover:border-cyan-400">
+                        <span id="client-photo-text">Arraste ou clique aqui</span>
+                        <img id="client-photo-preview" src="" class="hidden w-full h-full object-cover rounded-lg"/>
+                    </div>
+                    <input type="file" id="client-photo-input" class="hidden" accept="image/*">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm font-medium">Foto do Produto/Camisa</label>
+                    <div id="product-photo-dropzone" class="w-full h-32 flex items-center justify-center border-2 border-dashed border-gray-600 rounded-lg text-gray-400 cursor-pointer hover:bg-white/5 hover:border-cyan-400">
+                        <span id="product-photo-text">Arraste ou clique aqui</span>
+                        <img id="product-photo-preview" src="" class="hidden w-full h-full object-cover rounded-lg"/>
+                    </div>
+                    <input type="file" id="product-photo-input" class="hidden" accept="image/*">
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-4 mt-8">
+                  <button type="button" id="cancel-client-btn" class="py-2 px-6 rounded-lg bg-white/10 hover:bg-white/20 transition">Cancelar</button>
+                  <button type="submit" class="btn-shine py-2 px-6 font-bold rounded-lg">Salvar</button>
+              </div>
+          </form>
+      </div>
+    </div>
+
+  </div>
+  <script src="clientes.js"></script>
+</body>
+</html>

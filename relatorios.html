@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PSYZON - Relatórios Detalhados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-200">
+  <div class="flex flex-col min-h-screen">
+    
+    <header class="bg-gray-900/80 backdrop-blur-lg sticky top-0 z-40 border-b border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center">
+            <a href="index.html" class="flex-shrink-0">
+              <img src="https://www.dropbox.com/scl/fi/voa9em2o660y4ruwgwhfl/IMG_2995.png?rlkey=6ktftpckg8aioyw8lvsxqyijs&raw=1" alt="Logo Psyzon" class="h-12">
+            </a>
+          </div>
+          <div class="hidden md:block">
+            <nav class="ml-10 flex items-baseline space-x-16">
+              <a href="index.html" class="text-gray-300 text-cyan-300 px-3 py-2 rounded-md text-sm font-bold">Dashboard</a>
+              <a href="clientes.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Clientes</a>
+              <a href="processos.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Processos</a>
+              <a href="bloco_de_notas.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-bold">Bloco de Notas</a>
+              <a href="historico.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Histórico</a>
+              <a href="relatorios.html" class="bg-gray-300/20 text-cyan-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Relatórios</a>
+              <a href="configuracoes.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Configurações</a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4 md:p-6 lg:p-8">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold">Relatórios Detalhados</h1>
+      </div>
+      
+      <div class="glass-card p-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+          <div class="lg:col-span-1"><label for="start-date" class="block mb-2 text-sm font-medium text-gray-400">Data Início</label><input type="date" id="start-date" class="w-full p-2.5 rounded-md bg-white/10 border border-white/20"></div>
+          <div class="lg:col-span-1"><label for="end-date" class="block mb-2 text-sm font-medium text-gray-400">Data Fim</label><input type="date" id="end-date" class="w-full p-2.5 rounded-md bg-white/10 border border-white/20"></div>
+          <div class="lg:col-span-1"><label for="type-filter" class="block mb-2 text-sm font-medium text-gray-400">Tipo</label><select id="type-filter" class="w-full p-3 rounded-md bg-white/10 border border-white/20"><option value="all">Todos</option><option value="income">Receita</option><option value="expense">Despesa</option></select></div>
+          <div class="lg:col-span-1"><label for="scope-filter" class="block mb-2 text-sm font-medium text-gray-400">Escopo</label><select id="scope-filter" class="w-full p-3 rounded-md bg-white/10 border border-white/20" disabled><option value="all">Todos</option><option value="business">Empresarial</option><option value="personal">Pessoal</option></select></div>
+          <div class="lg:col-span-1"><label for="category-filter" class="block mb-2 text-sm font-medium text-gray-400">Categoria</label><select id="category-filter" class="w-full p-3 rounded-md bg-white/10 border border-white/20" disabled><option value="all">(Todos)</option></select></div>
+          <div class="lg:col-span-1"><button id="generate-report-btn" class="btn-shine w-full py-3 font-bold rounded-lg">Gerar Relatório</button></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="glass-card p-6"><h3 class="text-gray-400 text-lg">Receita no Período</h3><p id="income-period" class="text-4xl font-bold mt-2 text-green-400">R$ 0,00</p></div>
+        <div class="glass-card p-6"><h3 class="text-gray-400 text-lg">Despesa no Período</h3><p id="expense-period" class="text-4xl font-bold mt-2 text-red-400">R$ 0,00</p></div>
+        <div class="glass-card p-6"><h3 class="text-gray-400 text-lg">Saldo do Período</h3><p id="balance-period" class="text-4xl font-bold mt-2">R$ 0,00</p></div>
+      </div>
+      
+      <div class="glass-card p-6 mb-8">
+        <h3 class="text-xl font-bold mb-4 border-b border-white/10 pb-3">Gestão de Produção Mensal 👕</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div><label for="production-month" class="block mb-2 text-sm font-medium text-gray-400">Mês/Ano</label><input type="month" id="production-month" class="w-full p-2.5 rounded-md bg-white/10 border border-white/20"></div>
+          <div><label for="production-quantity" class="block mb-2 text-sm font-medium text-gray-400">Adicionar Peças Produzidas</label><input type="number" id="production-quantity" placeholder="Ex: 15" class="w-full p-2.5 rounded-md bg-white/10 border border-white/20"></div>
+          <div><button id="save-production-btn" class="btn-shine w-full py-3 font-bold rounded-lg">Adicionar à Produção</button></div>
+        </div>
+        <div class="mt-6">
+            <h4 class="text-lg font-semibold mb-2">Registros Salvos</h4>
+            <div id="production-list" class="max-h-40 overflow-y-auto pr-2"><p class="text-gray-500">Nenhum registro.</p></div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6 mb-8">
+        <h3 class="text-xl font-bold mb-4 border-b border-white/10 pb-3">🔥 Análise de Custo por Peça</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div><label for="analysis-month" class="block mb-2 text-sm font-medium text-gray-400">Selecione o Mês</label><input type="month" id="analysis-month" class="w-full p-2.5 rounded-md bg-white/10 border border-white/20"></div>
+          <div class="md:col-span-2"><button id="calculate-cost-btn" class="btn-shine w-full py-3 font-bold rounded-lg">Calcular Custo Real por Peça</button></div>
+        </div>
+        <div id="cost-analysis-results" class="mt-6 border-t border-white/10 pt-4 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div><h4 class="text-gray-400">Custos Indiretos no Mês</h4><p id="total-indirect-costs" class="text-3xl font-bold mt-1 text-red-400">R$ 0,00</p></div>
+                <div><h4 class="text-gray-400">Peças Produzidas no Mês</h4><p id="total-pieces-produced" class="text-3xl font-bold mt-1 text-teal-300">0</p></div>
+                <div class="bg-white/10 p-4 rounded-xl"><h4 class="text-gray-300">Custo Adicional por Peça</h4><p id="cost-per-piece" class="text-3xl font-bold mt-1 text-yellow-400">R$ 0,00</p></div>
+            </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 md:p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Resultados do Filtro</h3>
+            <button id="export-csv-btn" class="flex items-center gap-2 btn-shine py-2 px-4 font-semibold text-sm rounded-lg bg-green-500/20 text-green-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span>Exportar para CSV (Excel)</span>
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left min-w-[700px]">
+                <thead>
+                  <tr class="border-b border-white/10">
+                    <th class="p-3">Descrição</th>
+                    <th class="p-3">Valor</th>
+                    <th class="p-3">Tipo</th>
+                    <th class="p-3">Escopo</th>
+                    <th class="p-3">Categoria</th>
+                    <th class="p-3">Data</th>
+                  </tr>
+                </thead>
+                <tbody id="report-table-body">
+                </tbody>
+            </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="relatorios.js"></script>
+  <script src="theme-toggle.js"></script>
+</body>
+</html>

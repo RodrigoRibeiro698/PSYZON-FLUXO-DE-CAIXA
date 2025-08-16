@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PSYZON - Central de Produção</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-200">
+  <div class="flex flex-col min-h-screen">
+    
+    <header class="bg-gray-900/80 backdrop-blur-lg sticky top-0 z-40 border-b border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center">
+            <a href="index.html" class="flex-shrink-0">
+              <img src="https://www.dropbox.com/scl/fi/voa9em2o660y4ruwgwhfl/IMG_2995.png?rlkey=6ktftpckg8aioyw8lvsxqyijs&raw=1" alt="Logo Psyzon" class="h-12">
+            </a>
+          </div>
+          <div class="hidden md:block">
+            <nav class="ml-10 flex items-baseline space-x-16">
+              <a href="index.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+              <a href="clientes.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Clientes</a>
+              <a href="processos.html" class="bg-cyan-500/20 text-cyan-300 px-3 py-2 rounded-md text-sm font-bold">Processos</a>
+              <a href="bloco_de_notas.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-bold">Bloco de Notas</a>
+              <a href="historico.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Histórico</a>
+              <a href="relatorios.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Relatórios</a>
+              <a href="configuracoes.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Configurações</a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4 md:p-6 lg:p-8">
+      <div class="flex justify-between items-center mb-4">
+          <h1 class="text-2xl md:text-3xl font-bold">Central de Produção</h1>
+          <button id="add-order-btn" class="btn-shine py-2 px-4 font-bold rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600">+ Novo Pedido</button>
+      </div>
+
+      <div class="mb-8 border-b border-white/10">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+          <button id="tab-quadro" class="tab-btn active-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Quadro de Processos</button>
+          <button id="tab-afazeres" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Afazeres</button>
+          <button id="tab-artes" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Controle de Artes</button>
+          <button id="tab-cortes" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Controle de Cortes</button>
+          <button id="tab-dtf" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Controle de DTF</button>
+        </nav>
+      </div>
+
+      <div id="view-quadro" class="view-container">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 min-h-[32vh]">
+          <div class="glass-card p-4 flex flex-col"><h2 class="text-lg font-bold text-red-400 border-b-2 border-red-400/50 pb-2 mb-4">A FAZER</h2><div id="column-todo" class="kanban-column flex-1 space-y-4 p-2 -m-2 overflow-y-auto"></div></div>
+          <div class="glass-card p-4 flex flex-col"><h2 class="text-lg font-bold text-yellow-400 border-b-2 border-yellow-400/50 pb-2 mb-4">EM ANDAMENTO</h2><div id="column-doing" class="kanban-column flex-1 space-y-4 p-2 -m-2 overflow-y-auto"></div></div>
+          <div class="glass-card p-4 flex flex-col"><h2 class="text-lg font-bold text-green-400 border-b-2 border-green-400/50 pb-2 mb-4">CONCLUÍDO</h2><div id="column-done" class="kanban-column flex-1 space-y-4 p-2 -m-2 overflow-y-auto"></div></div>
+        </div>
+      </div>
+
+      <div id="view-afazeres" class="view-container hidden"><div id="tasks-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div></div>
+      <div id="view-artes" class="view-container hidden"><div id="art-tasks-container" class="space-y-6"></div></div>
+      <div id="view-cortes" class="view-container hidden"><div id="cutting-tasks-container" class="space-y-6"></div></div>
+      <!-- grid responsivo: 1 col em mobile, 2 em md, 3 em lg -->
+      <div id="view-dtf" class="view-container hidden">
+        <div id="dtf-tasks-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </div>
+    </main>
+
+    <div id="order-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] p-4 sm:p-6 lg:p-8">
+      <div class="glass-card-fullscreen w-full h-full flex flex-col">
+          <form id="order-form" class="flex-1 flex flex-col gap-6 overflow-y-auto p-2">
+            <div class="flex justify-between items-center"><h2 id="order-modal-title" class="text-3xl font-bold">Novo Pedido de Produção</h2><button type="button" id="cancel-order-btn" class="p-2 rounded-full hover:bg-white/10 text-3xl leading-none">&times;</button></div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+                <div class="space-y-4">
+                    <div><label for="order-description" class="block mb-2 text-sm font-medium">Descrição do Pedido</label><input type="text" id="order-description" class="w-full p-3 rounded-md bg-white/10 border border-white/20" required></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label for="order-client" class="block mb-2 text-sm font-medium">Cliente</label><select id="order-client" class="w-full p-3 rounded-md bg-white/10 border border-white/20" required></select></div>
+                        <div><label for="order-deadline" class="block mb-2 text-sm font-medium">Prazo de Entrega</label><input type="date" id="order-deadline" class="w-full p-3 rounded-md bg-white/10 border border-white/20" required></div>
+                    </div>
+                    <div><label for="order-notes" class="block mb-2 text-sm font-medium">Anotações do Pedido</label><textarea id="order-notes" rows="5" class="w-full p-3 rounded-md bg-white/10 border border-white/20"></textarea></div>
+                    <div class="border-t border-white/10 pt-4">
+                        <h3 class="text-lg font-semibold mb-3">Checklist de Pagamento</h3>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label for="order-total-value" class="block mb-2 text-sm font-medium">Valor Total (R$)</label><input type="number" id="order-total-value" step="0.01" class="w-full p-3 rounded-md bg-white/10 border border-white/20" required></div>
+                                <div><label for="order-amount-paid" class="block mb-2 text-sm font-medium">Valor Pago (R$)</label><input type="number" id="order-amount-paid" step="0.01" class="w-full p-3 rounded-md bg-white/10 border border-white/20"></div>
+                            </div>
+                            <label class="flex items-center gap-2 text-sm font-medium cursor-pointer"><input type="checkbox" id="order-is-paid" class="w-5 h-5 rounded text-cyan-500">Marcar como Pago (Sinal ou Total)</label>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Checklist de Produção</h3>
+                    <div id="order-checklist" class="space-y-2 text-sm"></div>
+                    <div id="cutting-details-section" class="hidden mt-4 p-4 rounded-lg bg-white/5 border border-white/10">
+                        <h4 class="text-md font-semibold mb-3 text-cyan-300">Detalhes do Corte</h4>
+                        <div id="cutting-subtasks-container" class="space-y-2"></div>
+                        <button type="button" id="add-cutting-item-btn" class="mt-2 text-xs btn-shine py-1 px-2 rounded-md">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="order-print-type" class="block mb-2 text-sm font-medium">Tipo de Estampa</label>
+                    <select id="order-print-type" class="w-full p-3 rounded-md bg-white/10 border border-white/20">
+                        <option value="dtf">DTF</option>
+                        <option value="silk">Silk</option>
+                    </select>
+                </div>
+
+                <!-- DTF — Arte & Quantidade (exibe somente quando order-print-type === 'dtf') -->
+                <div id="order-printing-block" class="hidden">
+                  <label class="block mb-2 text-sm font-medium">DTF — Arte, Quantidade & Observações</label>
+
+                  <div class="flex gap-2 items-center mb-2">
+                    <div id="order-printing-images" class="flex gap-2 flex-wrap"></div>
+                  </div>
+
+                  <input type="file" id="order-dtf-image-input" accept="image/*" multiple class="hidden">
+
+                  <div class="flex gap-2 items-center mb-2">
+                    <button type="button" id="order-add-dtf-image-btn" class="text-xs btn-shine py-1 px-2 rounded-md">Adicionar Arte DTF</button>
+
+                    <div class="flex-1">
+                      <label for="order-print-quantity" class="block text-xs text-gray-300">Quantidade</label>
+                      <input type="number" id="order-print-quantity" min="0" class="w-full p-2 rounded bg-white/5 text-sm" placeholder="Qtd total para impressão">
+                    </div>
+                  </div>
+
+                  <div class="mb-2">
+                    <label for="order-printing-notes" class="block text-xs text-gray-300 mb-1">Observações de Impressão</label>
+                    <textarea id="order-printing-notes" rows="3" class="w-full p-2 rounded bg-white/5 text-sm" placeholder="Ex.: orientação, acabamento, escala, cores especiais..."></textarea>
+                  </div>
+
+                  <div class="flex gap-2 text-xs">
+                    <button id="check-all-dtf-images-btn" type="button" class="p-1 rounded bg-white/5">Selecionar Todas</button>
+                    <button id="clear-dtf-images-btn" type="button" class="p-1 rounded bg-white/5">Limpar Artes</button>
+                  </div>
+
+                </div>
+            </div>
+            <div>
+                <label class="block mb-2 text-sm font-medium">Cores (CMYK)</label>
+                <div id="order-colors-container" class="flex gap-2 flex-wrap"></div>
+                <button type="button" id="add-color-btn" class="mt-2 text-xs btn-shine py-1 px-2 rounded-md">+ Cor</button>
+            </div>
+            <div class="flex-shrink-0 flex justify-end gap-4 pt-4 mt-auto border-t border-white/10"><button type="submit" class="btn-shine py-3 px-8 font-bold rounded-lg text-lg">Salvar Pedido</button></div>
+          </form>
+      </div>
+    </div>
+    
+    <div id="cutting-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] p-4 sm:p-6 lg:p-8">
+        <div class="glass-card-fullscreen w-full h-full flex flex-col">
+          <div class="flex justify-between items-center mb-4"><h2 id="cutting-modal-title" class="text-3xl font-bold">Checklist de Corte</h2><button type="button" id="close-cutting-modal-btn" class="p-2 rounded-full hover:bg-white/10 text-3xl leading-none">&times;</button></div>
+          <div id="cutting-checklist-container" class="flex-1 overflow-y-auto space-y-4 pr-2"></div>
+          <div class="flex-shrink-0 flex justify-end gap-4 pt-4 mt-auto border-t border-white/10"><button id="save-cuts-btn" class="btn-shine py-3 px-8 font-bold rounded-lg text-lg">Salvar e Concluir</button></div>
+        </div>
+    </div>
+
+    <div id="art-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] p-4 sm:p-6 lg:p-8">
+        <div class="glass-card-fullscreen w-full h-full flex flex-col">
+            <div class="flex justify-between items-center mb-4"><h2 id="art-modal-title" class="text-3xl font-bold">Detalhes da Arte</h2><button type="button" id="close-art-modal-btn" class="p-2 rounded-full hover:bg-white/10 text-3xl leading-none">&times;</button></div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1 overflow-y-auto">
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Briefing do Cliente</h3>
+                    <textarea id="art-briefing" rows="10" class="w-full p-3 rounded-md bg-white/10 border border-white/20" placeholder="Anote aqui todos os detalhes que o cliente pediu..."></textarea>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Imagens de Referência</h3>
+                    <div id="art-references-container" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+                    <input type="file" id="art-image-input" class="hidden" accept="image/*" multiple>
+                    <button type="button" id="add-art-image-btn" class="mt-4 w-full p-3 rounded-md bg-white/10 border-2 border-dashed border-gray-600 hover:border-cyan-400">Adicionar Imagem</button>
+                </div>
+            </div>
+            <div class="flex-shrink-0 flex justify-end gap-4 pt-4 mt-auto border-t border-white/10"><button id="save-art-btn" class="btn-shine py-3 px-8 font-bold rounded-lg text-lg">Salvar e Concluir Arte</button></div>
+        </div>
+    </div>
+
+  </div>
+  <script src="processos.js"></script>
+  <script src="theme-toggle.js"></script>
+</body>
+</html>

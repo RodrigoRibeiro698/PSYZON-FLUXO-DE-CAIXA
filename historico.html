@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PSYZON - Histórico de Dashboards</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-200">
+  <div class="flex flex-col min-h-screen">
+    
+    <header class="bg-gray-900/80 backdrop-blur-lg sticky top-0 z-40 border-b border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center">
+            <a href="index.html" class="flex-shrink-0">
+              <img src="https://www.dropbox.com/scl/fi/voa9em2o660y4ruwgwhfl/IMG_2995.png?rlkey=6ktftpckg8aioyw8lvsxqyijs&raw=1" alt="Logo Psyzon" class="h-12">
+            </a>
+          </div>
+          <div class="hidden md:block">
+            <nav class="ml-10 flex items-baseline space-x-16">
+              <a href="index.html" class="text-gray-300 px-3 py-2 rounded-md text-sm font-bold">Dashboard</a>
+              <a href="clientes.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Clientes</a>
+              <a href="processos.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Processos</a>
+              <a href="bloco_de_notas.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-bold">Bloco de Notas</a>
+              <a href="historico.html" class="bg-cyan-500/20 text-cyan-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Histórico</a>
+              <a href="relatorios.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Relatórios</a>
+              <a href="configuracoes.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Configurações</a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4 md:p-6 lg:p-8">
+      <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+          <h1 class="text-2xl md:text-3xl font-bold">Dashboard Histórico</h1>
+          <div class="flex items-center gap-4">
+            <input type="month" id="month-selector" class="p-2 rounded-md bg-white/10 border border-white/20">
+            <button id="add-transaction-btn" class="btn-shine py-2 px-4 font-bold rounded-lg">+ Lançamento</button>
+          </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div class="glass-card p-4 md:p-6"><h3 class="text-gray-400 text-base md:text-lg">Saldo (Final do Mês)</h3><p id="balance" class="text-2xl md:text-4xl font-bold mt-2">R$ 0,00</p></div>
+        <div class="glass-card p-4 md:p-6"><h3 class="text-gray-400 text-base md:text-lg">Receitas (no Mês)</h3><p id="total-income" class="text-2xl md:text-4xl font-bold mt-2 text-green-400">R$ 0,00</p></div>
+        <div class="glass-card p-4 md:p-6"><h3 class="text-gray-400 text-base md:text-lg">Despesas Emp. (no Mês)</h3><p id="total-expense" class="text-2xl md:text-4xl font-bold mt-2 text-red-400">R$ 0,00</p></div>
+        <div class="glass-card p-4 md:p-6"><h3 class="text-gray-400 text-base md:text-lg">Lucro Empresarial (no Mês)</h3><p id="profit" class="text-2xl md:text-4xl font-bold mt-2">R$ 0,00</p></div>
+        <div class="glass-card p-4 md:p-6 lg:col-span-2"><h3 class="text-gray-400 text-base md:text-lg">Custo por Peça (no Mês) 🏭</h3><p id="cost-per-piece-dashboard" class="text-2xl md:text-4xl font-bold mt-2 text-yellow-400">R$ 0,00</p></div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card p-6">
+          <h3 class="text-xl font-bold mb-4">Compras de Malha (no Mês)</h3>
+          <div class="relative h-80 md:h-96">
+            <canvas id="fabricChart"></canvas>
+          </div>
+        </div>
+        <div class="glass-card p-6">
+          <h3 class="text-xl font-bold mb-4">Fontes de Receita (no Mês) 💰</h3>
+          <div class="relative h-80 md:h-96">
+            <canvas id="incomeSourceChart"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <div class="glass-card p-4 md:p-6">
+        <h3 class="text-xl font-bold mb-4">Lançamentos do Mês Selecionado</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left min-w-[600px]">
+                <thead>
+                    <tr class="border-b border-white/10">
+                        <th class="p-3">Nome</th>
+                        <th class="p-3">Descrição</th>
+                        <th class="p-3">Valor</th>
+                        <th class="p-3">Escopo</th>
+                        <th class="p-3">Categoria</th>
+                        <th class="p-3">Data</th>
+                        <th class="p-3">Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-list"></tbody>
+            </table>
+        </div>
+      </div>
+    </main>
+    
+    <div id="modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 overflow-y-auto">
+      <div class="glass-card w-full max-w-lg my-8">
+          <form id="form" class="p-6 md:p-8">
+              <h2 class="text-2xl font-bold mb-6">Novo Lançamento</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div><label for="name" class="block mb-2 text-sm font-medium">Nome (Cliente/Fornecedor)</label><input type="text" id="name" class="w-full p-3 rounded-md bg-white/10 border border-white/20" placeholder="Ex: Cliente Vini"></div>
+                  <div><label for="description" class="block mb-2 text-sm font-medium">Descrição</label><input type="text" id="description" class="w-full p-3 rounded-md bg-white/10 border border-white/20" placeholder="Ex: 10 camisetas personalizadas" required></div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div><label for="amount" class="block mb-2 text-sm font-medium">Valor</label><input type="number" id="amount" step="0.01" class="w-full p-3 rounded-md bg-white/10 border border-white/20" placeholder="2250.00" required></div>
+                  <div><label for="date" class="block mb-2 text-sm font-medium">Data</label><input type="date" id="date" class="w-full p-3 rounded-md bg-white/10 border border-white/20" required></div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div><label for="type" class="block mb-2 text-sm font-medium">Tipo</label><select id="type" class="w-full p-3 rounded-md bg-white/10 border border-white/20"><option value="income">Receita</option><option value="expense">Despesa</option></select></div>
+                  <div><label for="category" class="block mb-2 text-sm font-medium">Categoria</label><select id="category" class="w-full p-3 rounded-md bg-white/10 border border-white/20"></select></div>
+              </div>
+              <div id="scope-container" class="hidden mb-4"><label class="block mb-2 text-sm font-medium">Escopo da Despesa</label><div class="grid grid-cols-2 gap-2"><button type="button" data-scope="business" class="scope-btn p-3 rounded-md border-2 bg-white/10">🏢 Empresarial</button><button type="button" data-scope="personal" class="scope-btn p-3 rounded-md border-2 bg-white/10">👤 Pessoal</button></div></div>
+              <div id="is-fabric-container" class="hidden mb-4"><label class="flex items-center gap-2 text-sm font-medium cursor-pointer"><input type="checkbox" id="is-fabric-checkbox" class="w-4 h-4 rounded text-cyan-500 bg-gray-700 border-gray-600">Esta despesa é compra de malha?</label></div>
+              <div id="fabric-details-container" class="hidden space-y-4 p-4 rounded-lg bg-white/5 border border-white/10 mb-4">
+                <h3 class="text-sm font-semibold text-cyan-300">Detalhes da Matéria-Prima</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label for="fabric-color" class="block mb-2 text-xs font-medium">Cor</label><input type="text" id="fabric-color" class="w-full p-2 rounded-md bg-white/10 border border-white/20 text-sm" placeholder="Ex: Preto"></div>
+                    <div><label for="fabric-weight" class="block mb-2 text-xs font-medium">Peso (Kg)</label><input type="number" step="0.01" id="fabric-weight" class="w-full p-2 rounded-md bg-white/10 border border-white/20 text-sm" placeholder="Ex: 15.5"></div>
+                </div>
+              </div>
+              <div id="quantity-field-container" class="hidden mb-4"><label for="transaction-quantity" class="block mb-2 text-sm font-medium">Quantidade de Peças</label><input type="number" id="transaction-quantity" class="w-full p-3 rounded-md bg-white/10 border border-white/20" placeholder="Ex: 10"></div>
+              <div class="border-t border-white/10 pt-4 mt-4">
+                <label class="flex items-center gap-2 text-sm font-medium cursor-pointer"><input type="checkbox" id="link-client-checkbox" class="w-4 h-4 rounded text-cyan-500 bg-gray-700 border-gray-600">Vincular esta transação a um cliente?</label>
+                <div id="client-selection-container" class="mt-2 hidden">
+                    <label for="client-select" class="block mb-2 text-sm font-medium text-gray-400">Selecione o Cliente</label>
+                    <select id="client-select" class="w-full p-3 rounded-md bg-white/10 border border-white/20"></select>
+                </div>
+              </div>
+              <div class="flex justify-end gap-4 mt-6"><button type="button" id="cancel-btn" class="py-2 px-6 rounded-lg bg-white/10 hover:bg-white/20">Cancelar</button><button type="submit" class="btn-shine py-2 px-6 font-bold rounded-lg">Adicionar</button></div>
+          </form>
+      </div>
+    </div>
+  </div>
+  <script src="historico.js"></script>
+  <script src="theme-toggle.js"></script>
+</body>
+</html>

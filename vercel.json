@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "public": true,
+  "builds": [
+    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "." } },
+    { "src": "!(package.json)", "use": "@vercel/static" }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

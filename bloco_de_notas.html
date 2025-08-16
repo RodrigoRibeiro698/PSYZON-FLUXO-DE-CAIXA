@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PSYZON - Bloco de Notas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-200">
+  <div class="flex flex-col min-h-screen">
+    
+    <header class="bg-gray-900/80 backdrop-blur-lg sticky top-0 z-40 border-b border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center">
+            <a href="index.html" class="flex-shrink-0">
+              <img src="https://www.dropbox.com/scl/fi/voa9em2o660y4ruwgwhfl/IMG_2995.png?rlkey=6ktftpckg8aioyw8lvsxqyijs&raw=1" alt="Logo Psyzon" class="h-12">
+            </a>
+          </div>
+          <div class="hidden md:block">
+            <nav class="ml-10 flex items-baseline space-x-16">
+              <a href="index.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+              <a href="clientes.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Clientes</a>
+              <a href="processos.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Processos</a>
+              <a href="bloco_de_notas.html" class="bg-cyan-500/20 text-cyan-300 px-3 py-2 rounded-md text-sm font-bold">Bloco de Notas</a>
+              <a href="historico.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Histórico</a>
+              <a href="relatorios.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Relatórios</a>
+              <a href="configuracoes.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Configurações</a>
+              
+            </nav>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4 md:p-6 lg:p-8 flex gap-6">
+      <!-- Sidebar: search + notes list -->
+      <aside class="w-80 glass-card p-4 flex flex-col gap-4">
+        <div class="flex items-center gap-2">
+          <input id="search-input" type="search" placeholder="Pesquisar notas..." class="flex-1 p-2 rounded bg-white/5 placeholder-gray-400">
+          <button id="new-tab-btn" title="Nova Nota" class="p-2 rounded-md hover:bg-white/10">+</button>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs">
+          <select id="sort-select" class="p-1 rounded bg-white/5">
+            <option value="updated_desc">Recentes</option>
+            <option value="updated_asc">Mais antigas</option>
+            <option value="title_asc">Título A→Z</option>
+          </select>
+          <button id="show-pinned-toggle" class="p-1 rounded bg-white/5">Mostrar apenas fixadas</button>
+        </div>
+
+        <div id="notes-list" class="overflow-y-auto flex-1 space-y-2"></div>
+      </aside>
+
+      <!-- Editor area -->
+      <section class="flex-1 flex flex-col glass-card p-4">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <input id="note-title" class="bg-transparent text-lg font-bold focus:outline-none" placeholder="Título da nota">
+            <button id="pin-btn" title="Fixar/Desfixar" class="text-sm p-1 rounded bg-white/5">
+              <!-- pin SVG -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="inline-block">
+                <path d="M13.5 6.5L17 3l4 4-3.5 3.5"></path>
+                <path d="M11 8l-6 6 4 4 6-6"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="export-btn" class="text-xs py-1 px-3 rounded bg-white/5">Baixar</button>
+            <button id="share-btn" class="text-xs py-1 px-3 rounded bg-white/5">Compartilhar</button>
+            <button id="duplicate-btn" class="text-xs py-1 px-3 rounded bg-white/5">Duplicar</button>
+            <button id="delete-btn" class="text-xs py-1 px-3 rounded bg-red-600/20">Excluir</button>
+          </div>
+        </div>
+
+        <div class="mb-2 flex items-center gap-2">
+          <button id="bold-btn" title="Negrito" class="p-2 rounded bg-white/5">B</button>
+          <button id="italic-btn" title="Itálico" class="p-2 rounded bg-white/5">I</button>
+          <button id="checklist-btn" title="Inserir checklist" class="p-2 rounded bg-white/5">
+            <!-- checklist SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="inline-block">
+              <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+              <path d="M9 12l2 2 4-4"></path>
+            </svg>
+          </button>
+          <button id="undo-btn" title="Desfazer" class="p-2 rounded bg-white/5">
+            <!-- undo SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="inline-block">
+              <path d="M9 14H5a4 4 0 0 1-4-4V5"></path>
+              <path d="M20 14a8 8 0 0 0-8-8H9"></path>
+            </svg>
+          </button>
+          <button id="redo-btn" title="Refazer" class="p-2 rounded bg-white/5">
+            <!-- redo SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="inline-block">
+              <path d="M15 14h4a4 4 0 0 0 4-4V5"></path>
+              <path d="M4 14a8 8 0 0 1 8-8h3"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="flex-1 flex relative">
+          <div id="line-numbers" class="w-12 text-right pr-4 text-gray-500 font-mono select-none overflow-y-hidden"></div>
+          <!-- usando textarea para simplicidade e compatibilidade -->
+          <div class="flex-1 flex gap-4 min-h-[360px]">
+            <textarea id="notepad-editor" class="flex-1 w-full p-4 rounded-b-lg bg-transparent text-gray-200 resize-none notepad-font"></textarea>
+
+            <!-- Checklist panel -->
+            <aside id="checklist-panel" class="w-72 glass-card p-3 flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <strong class="text-sm">Checklist</strong>
+                <div class="text-xs text-gray-400" id="checklist-progress">0%</div>
+              </div>
+              <div class="flex gap-2">
+                <input id="add-check-item-input" placeholder="Adicionar item..." class="flex-1 p-2 rounded bg-white/5 text-sm">
+                <button id="add-check-item-btn" class="p-2 rounded bg-cyan-600 text-white text-sm">+</button>
+              </div>
+              <div class="flex gap-2 text-xs">
+                <button id="check-all-btn" class="p-1 rounded bg-white/5">Marcar todos</button>
+                <button id="clear-checks-btn" class="p-1 rounded bg-white/5">Limpar</button>
+              </div>
+              <div id="checklist-list" class="flex-1 overflow-auto mt-2 space-y-2"></div>
+              <div class="text-xs text-gray-400">Itens sincronizados com linhas: <code>- [ ] item</code></div>
+            </aside>
+          </div>
+         </div>
+
+        <div class="border-t border-white/10 mt-2 pt-2 flex items-center gap-4">
+            <button id="save-file-btn" class="btn-shine text-xs py-1 px-3">Salvar no PC</button>
+            <button id="uppercase-btn" class="text-xs py-1 px-3 rounded-md bg-white/10 hover:bg-white/20">MAIÚSCULAS</button>
+            <button id="lowercase-btn" class="text-xs py-1 px-3 rounded-md bg-white/10 hover:bg-white/20">minúsculas</button>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="bloco_de_notas.js"></script>
+    <script src="theme-toggle.js"></script>
+</body>
+</html>

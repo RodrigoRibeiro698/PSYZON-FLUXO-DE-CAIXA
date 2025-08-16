@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PSYZON - Dashboard Financeiro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-200">
+  <div class="flex flex-col min-h-screen">
+    
+    <header class="bg-gray-900/80 backdrop-blur-lg sticky top-0 z-40 border-b border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center">
+            <a href="index.html" class="flex-shrink-0">
+              <img src="https://www.dropbox.com/scl/fi/voa9em2o660y4ruwgwhfl/IMG_2995.png?rlkey=6ktftpckg8aioyw8lvsxqyijs&raw=1" alt="Logo Psyzon" class="h-12">
+            </a>
+          </div>
+          <div class="hidden md:block">
+            <nav class="ml-10 flex items-baseline space-x-16">
+              <a href="index.html" class="bg-cyan-500/20 text-cyan-300 px-3 py-2 rounded-md text-sm font-bold">Dashboard</a>
+              <a href="clientes.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Clientes</a>
+              <a href="processos.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Processos</a>
+              <a href="bloco_de_notas.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-bold">Bloco de Notas</a>
+              <a href="historico.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Histórico</a>
+              <a href="relatorios.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Relatórios</a>
+              <a href="configuracoes.html" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Configurações</a>
+            </nav>
+          </div>
+          <div class="-mr-2 flex md:hidden">
+            <button id="mobile-menu-button" type="button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+              <span class="sr-only">Abrir menu principal</span>
+              <svg class="h-6 w-6 block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="mobile-menu" class="md:hidden hidden">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <a href="index.html" class="bg-cyan-500/20 text-cyan-300 block px-3 py-2 rounded-md text-base font-bold">Dashboard</a>
+          <a href="clientes.html" class="text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">Clientes</a>
+          <a href="processos.html" class="text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">Processos</a>
+          <a href="afazeres.html" class="text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">Afazeres</a>
+          <a href="historico.html" class="text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">Histórico</a>
+          <a href="relatorios.html" class="text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">Relatórios</a>
+          <a href="configuracoes.html" class="text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">Configurações</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4 md:p-6 lg:p-8">
+      <div class="flex justify-between items-center mb-8">
+          <h1 class="text-2xl md:text-3xl font-bold">Dashboard</h1>
+          <button id="add-transaction-btn" class="btn-shine py-2 px-4 md:py-3 md:px-6 text-sm md:text-base font-bold rounded-lg shadow-lg hover:shadow-cyan-500/40 hover:-translate-y-1 transition-all duration-200 bg-gradient-to-br from-cyan-500 to-cyan-600">+ Lançamento</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div class="glass-card p-4 md:p-6"><h3 class="text-gray-400 text-base md:text-lg">Saldo Atual</h3><p id="balance" class="text-2xl md:text-4xl font-bold mt-2">R$ 0,00</p></div>
+        <div class="glass-card p-4 md:p-6"><h3 class="text-gray-400 text-base md:text-lg">Receitas (Mês)</h3><p id="total-income" class="text-2xl md:text-4xl font-bold mt-2 text-green-400">R$ 0,00</p></div>
+        <div class="glass-card p-4 md:p-6"><h3 class="text-gray-400 text-base md:text-lg">Despesas Empresariais (Mês)</h3><p id="total-expense" class="text-2xl md:text-4xl font-bold mt-2 text-red-400">R$ 0,00</p></div>
+        <div class="glass-card p-4 md:p-6"><h3 class="text-gray-400 text-base md:text-lg">Lucro Empresarial (Mês)</h3><p id="profit" class="text-2xl md:text-4xl font-bold mt-2">R$ 0,00</p></div>
+        <div class="glass-card p-4 md:p-6 lg:col-span-2"><h3 class="text-gray-400 text-base md:text-lg">Custo por Peça (Mês Atual) 🏭</h3><p id="cost-per-piece-dashboard" class="text-2xl md:text-4xl font-bold mt-2 text-yellow-400">R$ 0,00</p></div>
+      </div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div class="lg:col-span-1 glass-card p-6">
+            <h3 class="text-xl font-bold mb-4">🗓️ Próximos Prazos</h3>
+            <div id="deadlines-list" class="space-y-3"></div>
+          </div>
+          <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-card p-6">
+              <h3 class="text-lg font-bold mb-2">🏢 Orçamento Empresarial</h3>
+              <div class="flex justify-between items-baseline mb-2">
+                <span id="business-spent" class="text-xl font-bold text-red-400">R$ 0,00</span>
+                <span id="business-limit-text" class="text-sm text-gray-400">de R$ 0,00</span>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-4"><div id="business-progress" class="h-4 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+            <div class="glass-card p-6">
+              <h3 class="text-lg font-bold mb-2">👤 Limite Pessoal</h3>
+               <div class="flex justify-between items-baseline mb-2">
+                <span id="personal-spent" class="text-xl font-bold text-yellow-400">R$ 0,00</span>
+                <span id="personal-limit-text" class="text-sm text-gray-400">de R$ 0,00</span>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-4"><div id="personal-progress" class="h-4 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+            <div class="glass-card p-6 md:col-span-2">
+              <h3 class="text-lg font-bold mb-2">🎯 Ponto de Equilíbrio (Mês)</h3>
+               <div class="flex justify-between items-baseline mb-2 text-xs sm:text-sm">
+                <span id="break-even-revenue" class="font-bold text-green-400">Receita: R$ 0,00</span>
+                <span id="break-even-target" class="font-bold text-red-400">Custos: R$ 0,00</span>
+              </div>
+              <div class="w-full bg-black/20 rounded-full h-5 flex overflow-hidden border border-white/10">
+                <div id="break-even-revenue-bar" class="bg-green-500 h-full transition-all duration-500 ease-out flex items-center justify-center text-xs font-bold text-white"></div>
+                <div id="break-even-costs-bar" class="bg-red-500 h-full transition-all duration-500 ease-out flex items-center justify-center text-xs font-bold text-white"></div>
+              </div>
+            </div>
+          </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card p-6">
+          <h3 class="text-xl font-bold mb-4">Visão Geral Anual</h3>
+          <div class="relative h-80 md:h-96">
+            <canvas id="incomeExpenseChart"></canvas>
+          </div>
+        </div>
+        <div class="glass-card p-6">
+          <h3 class="text-xl font-bold mb-4">Compras de Malha (Mês Atual)</h3>
+          <div class="relative h-80 md:h-96">
+            <canvas id="fabricChart"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <div class="glass-card p-4 md:p-6">
+        <h3 class="text-xl font-bold mb-4">Lançamentos Recentes</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left min-w-[600px]">
+                <thead>
+                    <tr class="border-b border-white/10">
+                        <th class="p-3">Nome</th>
+                        <th class="p-3">Descrição</th>
+                        <th class="p-3">Valor</th>
+                        <th class="p-3">Escopo</th>
+                        <th class="p-3">Categoria</th>
+                        <th class="p-3">Data</th>
+                        <th class="p-3">Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-list"></tbody>
+            </table>
+        </div>
+      </div>
+    </main>
+    
+    <div id="modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 overflow-y-auto">
+      <div class="glass-card w-full max-w-2xl my-8">
+          <form id="form" class="p-6 md:p-8">
+              <h2 class="text-2xl font-bold mb-6">Novo Lançamento</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                  
+                  <div class="md:col-span-2"><label for="name" class="block mb-2 text-sm font-medium">Nome (Cliente/Fornecedor)</label><input type="text" id="name" class="w-full p-3 rounded-md bg-white/10 border border-white/20" placeholder="Ex: Cliente Vini"></div>
+                  <div class="md:col-span-2"><label for="description" class="block mb-2 text-sm font-medium">Descrição</label><input type="text" id="description" class="w-full p-3 rounded-md bg-white/10 border border-white/20" placeholder="Ex: 10 camisetas personalizadas" required></div>
+
+                  <div><label for="amount" class="block mb-2 text-sm font-medium">Valor</label><input type="number" id="amount" step="0.01" class="w-full p-3 rounded-md bg-white/10 border border-white/20" placeholder="2250.00" required></div>
+                  <div><label for="date" class="block mb-2 text-sm font-medium">Data</label><input type="date" id="date" class="w-full p-3 rounded-md bg-white/10 border border-white/20" required></div>
+                  
+                  <div><label for="type" class="block mb-2 text-sm font-medium">Tipo</label><select id="type" class="w-full p-3 rounded-md bg-white/10 border border-white/20"><option value="income">Receita</option><option value="expense">Despesa</option></select></div>
+                  <div><label for="category" class="block mb-2 text-sm font-medium">Categoria</label><select id="category" class="w-full p-3 rounded-md bg-white/10 border border-white/20"></select></div>
+
+                  <div id="scope-container" class="hidden md:col-span-2"><label class="block mb-2 text-sm font-medium">Escopo da Despesa</label><div class="grid grid-cols-2 gap-2"><button type="button" data-scope="business" class="scope-btn p-3 rounded-md border-2 bg-white/10">🏢 Empresarial</button><button type="button" data-scope="personal" class="scope-btn p-3 rounded-md border-2 bg-white/10">👤 Pessoal</button></div></div>
+                  
+                  <div id="quantity-field-container" class="hidden"><label for="transaction-quantity" class="block mb-2 text-sm font-medium">Quantidade de Peças</label><input type="number" id="transaction-quantity" class="w-full p-3 rounded-md bg-white/10 border border-white/20" placeholder="Ex: 10"></div>
+                  
+                  <div id="is-fabric-container" class="hidden md:col-span-2">
+                    <label class="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                        <input type="checkbox" id="is-fabric-checkbox" class="w-4 h-4 rounded text-cyan-500 bg-gray-700 border-gray-600">
+                        Esta despesa é compra de malha?
+                    </label>
+                  </div>
+    
+                  <div id="fabric-details-container" class="hidden md:col-span-2 space-y-4 p-4 rounded-lg bg-white/5 border border-white/10">
+                    <h3 class="text-sm font-semibold text-cyan-300">Detalhes da Matéria-Prima</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label for="fabric-color" class="block mb-2 text-xs font-medium">Cor</label><input type="text" id="fabric-color" class="w-full p-2 rounded-md bg-white/10 border border-white/20 text-sm" placeholder="Ex: Preto"></div>
+                        <div><label for="fabric-weight" class="block mb-2 text-xs font-medium">Peso (Kg)</label><input type="number" step="0.01" id="fabric-weight" class="w-full p-2 rounded-md bg-white/10 border border-white/20 text-sm" placeholder="Ex: 15.5"></div>
+                    </div>
+                  </div>
+
+                  <div class="md:col-span-2 border-t border-white/10 pt-4 mt-2">
+                    <label class="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                        <input type="checkbox" id="link-client-checkbox" class="w-4 h-4 rounded text-cyan-500 bg-gray-700 border-gray-600">
+                        Vincular esta transação a um cliente?
+                    </label>
+                    <div id="client-selection-container" class="mt-2 hidden w-full">
+                        <label for="client-select" class="block mb-2 text-sm font-medium text-gray-400">Selecione o Cliente</label>
+                        <select id="client-select" class="w-full p-3 rounded-md bg-white/10 border border-white/20"></select>
+                    </div>
+                  </div>
+              </div>
+              <div class="flex justify-end gap-4 mt-6"><button type="button" id="cancel-btn" class="py-2 px-6 rounded-lg bg-white/10 hover:bg-white/20">Cancelar</button><button type="submit" class="btn-shine py-2 px-6 font-bold rounded-lg">Adicionar</button></div>
+          </form>
+      </div>
+    </div>
+    <div id="notification-container" class="fixed bottom-5 right-5 z-[100] w-full max-w-xs space-y-3"></div>
+  </div>
+  <script src="script.js"></script>
+  <script src="theme-toggle.js"></script>
+</body>
+</html>
