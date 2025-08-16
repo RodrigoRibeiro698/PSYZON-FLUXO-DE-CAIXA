@@ -1,4 +1,6 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const apiBaseUrl = 'http://localhost:3000/api'; // substitua pela URL do seu backend em produção
+
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
     const balanceEl = document.getElementById('balance');
@@ -48,11 +50,27 @@ document.addEventListener('DOMContentLoaded', () => {
     let incomeExpenseChart, categoryChart, incomeSourceChart, fabricChart;
     let incomeCategories = JSON.parse(localStorage.getItem('incomeCategories')) || ['Venda de Produto', 'Adiantamento', 'Serviços', 'Outros'];
     let expenseCategories = JSON.parse(localStorage.getItem('expenseCategories')) || ['Matéria-Prima (Custo Direto)', 'Aluguel', 'Contas (Água, Luz, Internet)', 'Marketing e Vendas', 'Salários e Pró-labore', 'Impostos', 'Software e Ferramentas', 'Manutenção', 'Despesas Pessoais', 'Outros'];
-    let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-    let clients = JSON.parse(localStorage.getItem('clients')) || [];
-    let productionOrders = JSON.parse(localStorage.getItem('production_orders')) || [];
-    let editingId = null; 
-    let selectedScope = 'business';
+    let transactions = [];
+    let clients = [];
+    let productionOrders = [];
+
+    // busca inicial do servidor
+    const fetchData = async () => {
+        try {
+            const [transRes, clientsRes, ordersRes] = await Promise.all([
+                fetch(`${apiBaseUrl}/transactions`),
+                fetch(`${apiBaseUrl}/clients`),
+                fetch(`${apiBaseUrl}/orders`)
+            ]);
+            transactions = await transRes.json();
+            clients = await clientsRes.json();
+            productionOrders = await ordersRes.json();
+            updateUI();
+        } catch (error) {
+            console.error("Falha ao carregar dados iniciais:", error);
+            alert("Não foi possível conectar ao servidor. Verifique se ele está rodando.");
+        }
+    };
 
     const saveTransactions = () => localStorage.setItem('transactions', JSON.stringify(transactions));
     const formatCurrency = (amount) => amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -502,6 +520,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // --- INICIALIZAÇÃO ---
-    updateUI();
+    await fetchData();
     setTimeout(checkDeadlinesAndNotify, 2000);
 });

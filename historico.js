@@ -1,6 +1,8 @@
 // Este script é uma cópia adaptada do script.js, mas com a lógica de filtragem por mês.
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   'use strict';
+
+  const apiBaseUrl = 'http://localhost:3000/api'; // ajuste para produção
 
   // DOM refs
   const monthSelector = document.getElementById('month-selector');
@@ -40,15 +42,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const fabricWeightInput = document.getElementById('fabric-weight');
 
   // state
-  let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-  let clients = JSON.parse(localStorage.getItem('clients')) || [];
-  let productionOrders = JSON.parse(localStorage.getItem('production_orders')) || [];
-  let incomeCategories = JSON.parse(localStorage.getItem('incomeCategories')) || ['Venda de Produto', 'Adiantamento', 'Serviços', 'Outros'];
-  let expenseCategories = JSON.parse(localStorage.getItem('expenseCategories')) || ['Matéria-Prima (Custo Direto)', 'Aluguel', 'Contas (Água, Luz, Internet)', 'Marketing e Vendas', 'Salários e Pró-labore', 'Impostos', 'Software e Ferramentas', 'Manutenção', 'Despesas Pessoais', 'Outros'];
-  let editingId = null;
-  let selectedScope = 'business';
-  let fabricChart = null;
-  let incomeSourceChart = null;
+  let transactions = [];
+  let clients = [];
+  let productionOrders = [];
+
+  const fetchData = async () => {
+    try {
+      const [transRes, clientsRes, ordersRes] = await Promise.all([
+        fetch(`${apiBaseUrl}/transactions`),
+        fetch(`${apiBaseUrl}/clients`),
+        fetch(`${apiBaseUrl}/orders`)
+      ]);
+      transactions = await transRes.json();
+      clients = await clientsRes.json();
+      productionOrders = await ordersRes.json();
+      renderDashboardForMonth(getSelectedMonth());
+    } catch (err) {
+      console.error('Erro ao carregar dados iniciais:', err);
+      alert('Não foi possível conectar ao servidor.');
+    }
+  };
 
   // utils
   const saveTransactions = () => localStorage.setItem('transactions', JSON.stringify(transactions));
@@ -204,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // modal flows
-  const handleSaveTransaction = (e) => {
+  const handleSaveTransaction = async (e) => {
     e.preventDefault();
     const isProductSale = typeInput.value === 'income' && categoryInput.value === 'Venda de Produto';
     if (!descriptionInput.value.trim() || !amountInput.value.trim() || !dateInput.value) {
@@ -240,22 +253,29 @@ document.addEventListener('DOMContentLoaded', () => {
       data.fabricColor = fabricColorInput.value.trim() || null;
     }
 
-    if (editingId) {
-      const idx = transactions.findIndex(t => t.id === editingId);
-      if (idx > -1) transactions[idx] = { ...transactions[idx], ...data };
-      showNotification('Lançamento atualizado', 'info');
-    } else {
-      transactions.push(data);
-      // if product sale linked to production counting, update monthlyProduction for that transaction's month
-      const month = data.date.substring(0,7);
-      if (data.quantity && data.type === 'income' && data.category === 'Venda de Produto') {
-        let monthlyProduction = JSON.parse(localStorage.getItem('monthlyProduction')) || [];
-        const findIdx = monthlyProduction.findIndex(p => p.month === month);
-        if (findIdx > -1) monthlyProduction[findIdx].quantity += data.quantity;
-        else monthlyProduction.push({ month, quantity: data.quantity });
-        localStorage.setItem('monthlyProduction', JSON.stringify(monthlyProduction));
+    try {
+      if (editingId) {
+        const idx = transactions.findIndex(t => t.id === editingId);
+        if (idx > -1) transactions[idx] = { ...transactions[idx], ...data };
+        showNotification('Lançamento atualizado', 'info');
+        await fetch(`${apiBaseUrl}/transactions/${editingId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      } else {
+        transactions.push(data);
+        // if product sale linked to production counting, update monthlyProduction for that transaction's month
+        const month = data.date.substring(0,7);
+        if (data.quantity && data.type === 'income' && data.category === 'Venda de Produto') {
+          let monthlyProduction = JSON.parse(localStorage.getItem('monthlyProduction')) || [];
+          const findIdx = monthlyProduction.findIndex(p => p.month === month);
+          if (findIdx > -1) monthlyProduction[findIdx].quantity += data.quantity;
+          else monthlyProduction.push({ month, quantity: data.quantity });
+          localStorage.setItem('monthlyProduction', JSON.stringify(monthlyProduction));
+        }
+        showNotification('Lançamento adicionado', 'info');
+        await fetch(`${apiBaseUrl}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
       }
-      showNotification('Lançamento adicionado', 'info');
+    } catch (err) {
+      console.error('Erro ao salvar transação:', err);
+      showNotification('Erro ao salvar transação', 'danger');
     }
     saveTransactions();
     closeModal();
@@ -330,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.classList.add('hidden');
   };
 
-  window.removeTransaction = (id) => {
+  window.removeTransaction = async (id) => {
     if (!confirm('Confirma exclusão?')) return;
     const tx = transactions.find(t => t.id === id);
     if (tx && tx.type === 'income' && tx.category === 'Venda de Produto' && tx.quantity > 0) {
@@ -347,6 +367,12 @@ document.addEventListener('DOMContentLoaded', () => {
     saveTransactions();
     renderDashboardForMonth(getSelectedMonth());
     showNotification('Lançamento removido', 'warning');
+    try {
+      await fetch(`${apiBaseUrl}/transactions/${id}`, { method: 'DELETE' });
+    } catch (err) {
+      console.error('Erro ao excluir transação:', err);
+      showNotification('Erro ao excluir transação', 'danger');
+    }
   };
 
   // Event delegation for edit/delete buttons in table
@@ -516,9 +542,9 @@ document.addEventListener('DOMContentLoaded', () => {
         quantityContainer.classList.toggle('hidden', !isProductSale);
         quantityInput.required = isProductSale;
         if (!isProductSale) quantityInput.value = '';
-    };
-
-    const toggleFabricDetailsField = () => {
+      };
+  
+      const toggleFabricDetailsField = () => {
         const isExpense = typeInput.value === 'expense';
         isFabricContainer.classList.toggle('hidden', !isExpense);
         
@@ -526,18 +552,18 @@ document.addEventListener('DOMContentLoaded', () => {
             isFabricCheckbox.checked = false;
         }
         fabricDetailsContainer.classList.toggle('hidden', !isFabricCheckbox.checked);
-    };
-
-    const toggleScopeField = () => {
+      };
+  
+      const toggleScopeField = () => {
         scopeContainer.classList.toggle('hidden', typeInput.value !== 'expense');
-    };
-    
-    const updateCategoryOptions = () => {
+      };
+      
+      const updateCategoryOptions = () => {
         const options = typeInput.value === 'income' ? incomeCategories : expenseCategories;
         categoryInput.innerHTML = options.map(cat => `<option value="${cat}" class="bg-gray-800">${cat}</option>`).join('');
-    };
-    
-    const populateClientSelect = () => {
+      };
+      
+      const populateClientSelect = () => {
         clients = JSON.parse(localStorage.getItem('clients')) || [];
         clientSelect.innerHTML = '<option value="" class="bg-gray-800">Selecione...</option>';
         clients.forEach(client => {
@@ -547,23 +573,23 @@ document.addEventListener('DOMContentLoaded', () => {
             option.className = 'bg-gray-800';
             clientSelect.appendChild(option);
         });
-    };
-
-    scopeButtons.forEach(button => {
+      };
+  
+      scopeButtons.forEach(button => {
         button.addEventListener('click', () => {
             scopeButtons.forEach(btn => btn.classList.replace('border-cyan-400', 'border-transparent'));
             button.classList.replace('border-transparent', 'border-cyan-400');
             selectedScope = button.dataset.scope;
         });
     });
-
-    const handleFormSubmit = (e) => {
+  
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
         const isProductSale = typeInput.value === 'income' && categoryInput.value === 'Venda de Produto';
         if (!descriptionInput.value.trim() || !amountInput.value.trim() || !dateInput.value) { alert('Por favor, preencha todos os campos obrigatórios.'); return; }
         if (isProductSale && (!quantityInput.value || parseInt(quantityInput.value, 10) <= 0)) { alert('Por favor, informe uma quantidade de peças válida.'); return; }
         if (linkClientCheckbox.checked && !clientSelect.value) { alert('Por favor, selecione um cliente.'); return; }
-
+  
         const amount = typeInput.value === 'expense' ? -Math.abs(parseFloat(amountInput.value)) : parseFloat(amountInput.value);
         
         const transactionData = {
@@ -579,7 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
             weightKg: 0,
             fabricColor: null
         };
-
+  
         if (isProductSale) {
             transactionData.quantity = parseInt(quantityInput.value, 10) || 0;
         }
@@ -587,39 +613,44 @@ document.addEventListener('DOMContentLoaded', () => {
             transactionData.weightKg = parseFloat(fabricWeightInput.value) || 0;
             transactionData.fabricColor = fabricColorInput.value.trim() || null;
         }
-
+  
         let newTransactionId = null;
-        if (editingId) {
-            const transactionIndex = transactions.findIndex(t => t.id === editingId);
-            if (transactionIndex > -1) {
-                transactions[transactionIndex] = { ...transactions[transactionIndex], ...transactionData };
-            }
-        } else {
-            const newTransaction = { ...transactionData, id: Date.now() };
-            transactions.push(newTransaction);
-            newTransactionId = newTransaction.id;
-            if (isProductSale) {
-                updateMonthlyProduction(newTransaction.date.substring(0, 7), newTransaction.quantity);
-            }
-        }
-        
-        saveTransactions();
-        updateUI();
-        closeModal();
-
-        const isLinkedProductSale = isProductSale && transactionData.clientId;
-        if (isLinkedProductSale && newTransactionId) {
-            setTimeout(() => {
-                if (confirm("Venda registrada com sucesso! Deseja criar um pedido de produção para este item na aba 'Processos'?")) {
-                    const client = clients.find(c => c.id === transactionData.clientId);
-                    const prefillData = { description: transactionData.description, clientId: transactionData.clientId };
-                    localStorage.setItem('prefill_order_form', JSON.stringify(prefillData));
-                    window.location.href = 'processos.html?action=new_order';
+        try {
+            if (editingId) {
+                const transactionIndex = transactions.findIndex(t => t.id === editingId);
+                if (transactionIndex > -1) {
+                    transactions[transactionIndex] = { ...transactions[transactionIndex], ...transactionData };
                 }
-            }, 500);
+            } else {
+                const newTransaction = { ...transactionData, id: Date.now() };
+                transactions.push(newTransaction);
+                newTransactionId = newTransaction.id;
+                if (isProductSale) {
+                    updateMonthlyProduction(newTransaction.date.substring(0, 7), newTransaction.quantity);
+                }
+            }
+            
+            saveTransactions();
+            updateUI();
+            closeModal();
+  
+            const isLinkedProductSale = isProductSale && transactionData.clientId;
+            if (isLinkedProductSale && newTransactionId) {
+                setTimeout(() => {
+                    if (confirm("Venda registrada com sucesso! Deseja criar um pedido de produção para este item na aba 'Processos'?")) {
+                        const client = clients.find(c => c.id === transactionData.clientId);
+                        const prefillData = { description: transactionData.description, clientId: transactionData.clientId };
+                        localStorage.setItem('prefill_order_form', JSON.stringify(prefillData));
+                        window.location.href = 'processos.html?action=new_order';
+                    }
+                }, 500);
+            }
+        } catch (error) {
+            console.error('Erro ao salvar transação:', error);
+            showNotification('Erro ao salvar transação', 'danger');
         }
     };
-
+  
     const openAddModal = () => {
         editingId = null;
         form.reset();
@@ -639,7 +670,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.textContent = 'Adicionar';
         modal.classList.remove('hidden');
     };
-
+  
     window.openEditModal = (id) => {
         editingId = id;
         const transaction = transactions.find(t => t.id === id);
@@ -660,12 +691,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const isFabric = !!(transaction.weightKg || transaction.fabricColor);
         isFabricCheckbox.checked = isFabric;
         toggleFabricDetailsField();
-
+  
         if (isFabric) {
             fabricWeightInput.value = transaction.weightKg || '';
             fabricColorInput.value = transaction.fabricColor || '';
         }
-
+  
         toggleScopeField();
         if (transaction.type === 'expense') {
             selectedScope = transaction.scope || 'business';
@@ -674,7 +705,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector(`.scope-btn[data-scope="${selectedScope}"]`).classList.replace('border-transparent', 'border-cyan-400');
             }
         }
-
+  
         populateClientSelect();
         if (transaction.clientId) {
             linkClientCheckbox.checked = true;
@@ -684,18 +715,18 @@ document.addEventListener('DOMContentLoaded', () => {
             linkClientCheckbox.checked = false;
             clientSelectionContainer.classList.add('hidden');
         }
-
+  
         modalTitle.textContent = 'Editar Lançamento';
         submitBtn.textContent = 'Salvar Alterações';
         modal.classList.remove('hidden');
     };
-
+  
     const closeModal = () => {
         editingId = null;
         form.reset();
         modal.classList.add('hidden');
     };
-
+  
     const updateMonthlyProduction = (month, quantity) => {
         let monthlyProduction = JSON.parse(localStorage.getItem('monthlyProduction')) || [];
         const existingEntryIndex = monthlyProduction.findIndex(item => item.month === month);
@@ -707,7 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('monthlyProduction', JSON.stringify(monthlyProduction));
     };
     
-    window.removeTransaction = (id) => {
+    window.removeTransaction = async (id) => {
         if (confirm('Tem certeza que deseja excluir esta transação?')) {
             const transactionToDelete = transactions.find(t => t.id === id);
             if (transactionToDelete && transactionToDelete.type === 'income' && transactionToDelete.category === 'Venda de Produto' && transactionToDelete.quantity > 0) {
@@ -715,6 +746,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             transactions = transactions.filter(t => t.id !== id);
             updateUI();
+  
+            try {
+                await fetch(`${apiBaseUrl}/transactions/${id}`, { method: 'DELETE' });
+            } catch (err) {
+                console.error('Erro ao excluir transação:', err);
+                showNotification('Erro ao excluir transação', 'danger');
+            }
         }
     };
     
@@ -737,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         transactionListEl.appendChild(item);
     };
-
+  
     const updateDeadlinesCard = () => {
         productionOrders = JSON.parse(localStorage.getItem('production_orders')) || [];
         clients = JSON.parse(localStorage.getItem('clients')) || [];
@@ -792,7 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (categoryChart) categoryChart.destroy();
             categoryChart = new Chart(doughnutChartCtx, { type: 'doughnut', data: { labels: Object.keys(expenseByCategory), datasets: [{ data: Object.values(expenseByCategory), backgroundColor: ['#9333ea', '#db2777', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#6b7280'], borderColor: '#111827', borderWidth: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
         }
-
+  
         const incomeSourceChartCtx = document.getElementById('incomeSourceChart');
         if (incomeSourceChartCtx) {
             const incomeByCategory = monthlyTransactions.filter(t => t.type === 'income').reduce((acc, t) => { acc[t.category] = (acc[t.category] || 0) + t.amount; return acc; }, {});
@@ -833,7 +871,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     };
-
+  
     const updateUI = () => {
         const now = new Date();
         const currentMonth = now.getMonth();

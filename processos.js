@@ -1,4 +1,6 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const apiBaseUrl = 'http://localhost:3000/api'; // ajuste para sua API
+
     const addOrderBtn = document.getElementById('add-order-btn');
     const tabQuadro = document.getElementById('tab-quadro');
     const tabAfazeres = document.getElementById('tab-afazeres');
@@ -67,13 +69,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const artImageInput = document.getElementById('art-image-input');
     const saveArtBtn = document.getElementById('save-art-btn');
 
-    let productionOrders = JSON.parse(localStorage.getItem('production_orders')) || [];
-    let clients = JSON.parse(localStorage.getItem('clients')) || [];
-    let editingOrderId = null;
-    let activeCuttingOrderId = null;
-    let activeArtOrderId = null;
+    let productionOrders = [];
+    let clients = [];
+    let transactions = [];
 
-
+    const fetchData = async () => {
+        try {
+            const [ordersRes, clientsRes, transRes] = await Promise.all([
+                fetch(`${apiBaseUrl}/orders`),
+                fetch(`${apiBaseUrl}/clients`),
+                fetch(`${apiBaseUrl}/transactions`)
+            ]);
+            productionOrders = await ordersRes.json();
+            clients = await clientsRes.json();
+            transactions = await transRes.json();
+            renderDTFTasks();
+            // outras renderizações iniciais...
+        } catch (err) {
+            console.error('Erro ao carregar dados iniciais:', err);
+            alert('Não foi possível conectar ao servidor.');
+        }
+    };
 
     const checklistItems = { art: "Arte/Design Aprovado", mockup: "Mockup Aprovado", fabric: "Malha/Tecido Comprado", cutting: "Corte Realizado", sewing: "Costura Realizada", printing: "Estampa/Bordado Realizado", finishing: "Acabamento e Embalagem" };
     const sizeOptions = { adulto: ['PP', 'P', 'M', 'G', 'GG', 'EXG', 'G1', 'G2'], infantil: ['1 a 2 anos', '3 a 4 anos', '5 a 6 anos', '7 a 8 anos', '9 a 10 anos'] };
