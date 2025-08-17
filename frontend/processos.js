@@ -1226,3 +1226,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('button').forEach(b => console.log(b.id, b.type));
 }); // end DOMContentLoaded
 //
+
+const { Firestore } = require('@google-cloud/firestore');
+const { Storage } = require('@google-cloud/storage');
+
+function loadGoogleCredentials() {
+  if (process.env.GOOGLE_CREDENTIALS_JSON) {
+    try {
+      const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+      console.log('Loaded GOOGLE_CREDENTIALS_JSON, project_id:', creds.project_id || '<no-project>');
+      return { credentials: creds };
+    } catch (e) {
+      console.error('Failed to parse GOOGLE_CREDENTIALS_JSON:', e.message);
+    }
+  }
+
+  if (process.env.GOOGLE_CREDENTIALS_B64) {
+    try {
+      const json = Buffer.from(process.env.GOOGLE_CREDENTIALS_B64, 'base64').toString('utf8');
+      const creds = JSON.parse(json);
+      console.log('Loaded GOOGLE_CREDENTIALS_B64, project_id:', creds.project_id || '<no-project>');
+      return { credentials: creds };
+    } catch (e) {
+      console.error('Failed to parse GOOGLE_CREDENTIALS_B64:', e.message);
+    }
+  }
+
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    console.warn('GOOGLE_APPLICATION_CREDENTIALS is set — prefer GOOGLE_CREDENTIALS_B64 or GOOGLE_CREDENTIALS_JSON for serverless.');
+  } else {
+    console.warn('No Google credentials env var found.');
+  }
+
+  return undefined;
+}
+
+const firestoreConfig = loadGoogleCredentials();
+
+let firestore, storage;
+try {
+  firestore = new Firestore(firestoreConfig);
+  storage = new Storage(firestoreConfig);
+  console.log('Firestore/Storage clients created (config used? ' + (firestoreConfig ? 'yes' : 'no') + ')');
+} catch (e) {
+  console.error('Error creating Firestore/Storage clients:', e && e.stack ? e.stack : e);
+}
