@@ -4,36 +4,71 @@ const multer = require('multer');
 require('dotenv').config();
 const { Firestore } = require('@google-cloud/firestore');
 const { Storage } = require('@google-cloud/storage');
-// adiciona cliente Gemini (opcional, só inicializa se tiver a chave)
-let genAI = null;
-try {
-  const { GoogleGenerativeAI } = require('@google/generative-ai');
-  if (process.env.GEMINI_API_KEY) {
-    // inicializa cliente (biblioteca espera apiKey)
-    genAI = new GoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
-    console.log('Gemini client inicializado.');
-  } else {
-    console.log('GEMINI_API_KEY não definida — Gemini endpoints estarão desabilitados.');
+
+function loadGoogleCredentials() {
+  if (process.env.GOOGLE_CREDENTIALS_JSON) {
+    try {
+      const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+      console.log('Loaded GOOGLE_CREDENTIALS_JSON, project_id:', creds.project_id || '<no-project>');
+      return { credentials: creds };
+    } catch (e) {
+      console.error('Failed to parse GOOGLE_CREDENTIALS_JSON:', e.message);
+    }
   }
-} catch (e) {
-  console.warn('@google/generative-ai não instalado ou falha ao require — endpoints Gemini ficarão desabilitados.', e.message);
+  if (process.env.GOOGLE_CREDENTIALS_B64) {
+    try {
+      const json = Buffer.from(process.env.GOOGLE_CREDENTIALS_B64, 'base64').toString('utf8');
+      const creds = JSON.parse(json);
+      console.log('Loaded GOOGLE_CREDENTIALS_B64, project_id:', creds.project_id || '<no-project>');
+      return { credentials: creds };
+    } catch (e) {
+      console.error('Failed to parse GOOGLE_CREDENTIALS_B64:', e.message);
+    }
+  }
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    console.warn('GOOGLE_APPLICATION_CREDENTIALS is set — serverless may not have the file. Prefer B64 or JSON env var.');
+  } else {
+    console.warn('No Google credentials env var found.');
+  }
+  return undefined;
 }
 
-let firestoreConfig = {};
-if (process.env.GOOGLE_CREDENTIALS_JSON) {
+const firestoreConfig = loadGoogleCredentials();
+
+let firestore, storage;
+try {
+  firestore = new Firestore(firestoreConfig);
+  storage = new Storage(firestoreConfig);
+  console.log('Firestore/Storage clients created (config used? ' + (firestoreConfig ? 'yes' : 'no') + ')');
+} catch (e) {
+  console.error('Error creating Firestore/Storage clients:', e && e.stack ? e.stack : e);
+}
+
+// startup validation (async IIFE) — logs detalhados para debugging
+(async () => {
   try {
-    firestoreConfig = { credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON) };
-    if (!firestoreConfig.projectId && firestoreConfig.credentials && firestoreConfig.credentials.project_id) {
-      firestoreConfig.projectId = firestoreConfig.credentials.project_id;
+    if (firestore) {
+      try {
+        const cols = await firestore.listCollections();
+        console.log('Firestore auth OK — collections count (preview):', cols.length);
+      } catch (err) {
+        console.error('Firestore credential/permission check failed:', err && err.stack ? err.stack : err);
+      }
+    }
+    if (storage) {
+      const bucketName = process.env.BUCKET_NAME || 'psyzon-dashboard-arquivos-rodrigo';
+      try {
+        const b = storage.bucket(bucketName);
+        const [meta] = await b.getMetadata();
+        console.log('Storage bucket metadata loaded:', meta && meta.name);
+      } catch (err) {
+        console.error('Storage bucket access failed:', err && err.stack ? err.stack : err);
+      }
     }
   } catch (e) {
-    console.error('Failed to parse GOOGLE_CREDENTIALS_JSON env var:', e);
+    console.error('Startup validation unexpected error:', e && e.stack ? e.stack : e);
   }
-}
-
-// fallback: if running locally and GOOGLE_APPLICATION_CREDENTIALS points to a file, let client lib pick it up (no config)
-const firestore = new Firestore(Object.keys(firestoreConfig).length ? firestoreConfig : undefined);
-const storage = new Storage(Object.keys(firestoreConfig).length ? firestoreConfig : undefined);
+})();
 
 const BUCKET_NAME = process.env.BUCKET_NAME || 'psyzon-dashboard-arquivos-rodrigo';
 const bucket = storage.bucket(BUCKET_NAME);
