@@ -1,7 +1,8 @@
-node_modules/
-dist/
-.vscode/
-.DS_Store
-*.sqlite
-uploads/
+# Arquivos de Ambiente
 .env
+
+# Credenciais do Google
+google-credentials.json
+
+# Pasta de dependências do Node
+/backend/node_modules
