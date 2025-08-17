@@ -1,7 +1,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   'use strict';
-const apiBaseUrl = '/api'; // 
+  const apiBaseUrl = '/api'; // 
   /* Config */
   const LS_KEY = 'psyzon_notes_v3';
   const LS_ACTIVE = 'psyzon_active_note_v3';
