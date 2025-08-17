@@ -247,71 +247,95 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     addCuttingItemBtn.addEventListener('click', () => renderCuttingSubtask());
 
+    const saveOrderBtn = document.getElementById('save-order-btn');
     if (orderForm) {
-        orderForm.addEventListener('submit', (e) => {
+        orderForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const checklist = {};
-            document.querySelectorAll('.checklist-item-status').forEach(item => {
-                const key = item.dataset.key;
-                const deadlineInput = document.querySelector(`.checklist-item-deadline[data-key="${key}"]`);
-                checklist[key] = { completed: item.checked, deadline: deadlineInput.value || null };
-            });
+            const saveOrderBtn = document.getElementById('save-order-btn');
+            if (saveOrderBtn) saveOrderBtn.disabled = true;
 
-            const subtasks = [];
-            cuttingSubtasksContainer.querySelectorAll('.grid').forEach(row => {
-                const totalInput = row.querySelector('.subtask-total');
-                if (totalInput && totalInput.value) {
-                    const existingSubtask = (editingOrderId && productionOrders.find(o => o.id === editingOrderId).checklist.cutting.subtasks.find(s => s.id == row.dataset.subtaskId));
-                    subtasks.push({
-                        id: parseFloat(row.dataset.subtaskId) || Date.now() + Math.random(),
-                        type: row.querySelector('.subtask-gender') ? row.querySelector('.subtask-gender').value : (row.querySelector('.subtask-type') ? row.querySelector('.subtask-type').value : 'Feminina'),
-                        style: row.querySelector('.subtask-style') ? row.querySelector('.subtask-style').value : (existingSubtask ? existingSubtask.style : 'Normal'),
-                        size: row.querySelector('.subtask-size').value,
-                        total: parseInt(totalInput.value) || 0,
-                        cut: existingSubtask ? existingSubtask.cut : 0
+            try {
+                const checklist = {};
+                document.querySelectorAll('.checklist-item-status').forEach(item => {
+                    const key = item.dataset.key;
+                    const deadlineInput = document.querySelector(`.checklist-item-deadline[data-key="${key}"]`);
+                    checklist[key] = { completed: item.checked, deadline: deadlineInput.value || null };
+                });
+
+                const subtasks = [];
+                cuttingSubtasksContainer.querySelectorAll('.grid').forEach(row => {
+                    const totalInput = row.querySelector('.subtask-total');
+                    if (totalInput && totalInput.value) {
+                        const existingSubtask = (editingOrderId && productionOrders.find(o => o.id === editingOrderId)?.checklist?.cutting?.subtasks?.find(s => s.id == row.dataset.subtaskId));
+                        subtasks.push({
+                            id: parseFloat(row.dataset.subtaskId) || Date.now() + Math.random(),
+                            type: row.querySelector('.subtask-gender') ? row.querySelector('.subtask-gender').value : (row.querySelector('.subtask-type') ? row.querySelector('.subtask-type').value : 'Feminina'),
+                            style: row.querySelector('.subtask-style') ? row.querySelector('.subtask-style').value : (existingSubtask ? existingSubtask.style : 'Normal'),
+                            size: row.querySelector('.subtask-size').value,
+                            total: parseInt(totalInput.value) || 0,
+                            cut: existingSubtask ? existingSubtask.cut : 0
+                        });
+                    }
+                });
+
+                checklist.cutting = checklist.cutting || {};
+                checklist.cutting.completed = subtasks.length > 0 && subtasks.every(s => s.cut >= s.total);
+                checklist.cutting.subtasks = subtasks;
+
+                const colors = orderColorsContainer
+                    ? Array.from(orderColorsContainer.querySelectorAll('.color-hex, .color-input'))
+                            .map(i => (i.value || '').trim())
+                            .filter(v => v)
+                    : [];
+
+                const orderData = {
+                    description: orderDescriptionInput.value,
+                    clientId: parseInt(orderClientSelect.value) || null,
+                    deadline: orderDeadlineInput.value,
+                    checklist: checklist,
+                    notes: orderNotesInput.value.trim(),
+                    totalValue: parseFloat(orderTotalValueInput.value) || 0,
+                    amountPaid: parseFloat(orderAmountPaidInput.value) || 0,
+                    isPaid: orderIsPaidCheckbox.checked,
+                    printType: orderPrintTypeSelect ? orderPrintTypeSelect.value : 'dtf',
+                    colors: colors,
+                    printing: {
+                        images: activeDtfImages.slice(),
+                        total: parseInt(orderPrintQuantityInput?.value) || 0,
+                        notes: orderPrintingNotesInput ? (orderPrintingNotesInput.value || '').trim() : ''
+                    },
+                    // Garante que o status seja mantido ao editar
+                    status: editingOrderId ? productionOrders.find(o => o.id === editingOrderId).status : 'todo' 
+                };
+                
+                try {
+                    const method = editingOrderId ? 'PUT' : 'POST';
+                    const url = editingOrderId ? `${apiBaseUrl}/orders/${editingOrderId}` : `${apiBaseUrl}/orders`;
+                    const res = await fetch(url, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(editingOrderId ? orderData : { ...orderData, status: 'todo' })
                     });
+
+                    if (!res.ok) {
+                        const txt = await res.text().catch(() => res.statusText);
+                        throw new Error(`/api/orders error ${res.status}: ${txt}`);
+                    }
+
+                    await fetchData();
+                    closeModal && closeModal();
+                } catch (error) {
+                    console.error('Erro ao salvar pedido:', error);
+                    alert('Não foi possível salvar o pedido. Verifique a conexão e tente novamente.');
+                } finally {
+                    if (saveOrderBtn) saveOrderBtn.disabled = false;
                 }
-            });
-
-            checklist.cutting = checklist.cutting || {};
-            checklist.cutting.completed = subtasks.length === 0;
-            checklist.cutting.subtasks = subtasks;
-
-            // coleta cores dos inputs reais (hex text inputs ou compatíveis)
-            const colors = orderColorsContainer
-                ? Array.from(orderColorsContainer.querySelectorAll('.color-hex, .color-input'))
-                      .map(i => (i.value || '').trim())
-                      .filter(v => v)
-                : [];
-
-            const orderData = {
-                description: orderDescriptionInput.value,
-                clientId: parseInt(orderClientSelect.value) || null,
-                deadline: orderDeadlineInput.value,
-                checklist: checklist,
-                notes: orderNotesInput.value.trim(),
-                totalValue: parseFloat(orderTotalValueInput.value) || 0,
-                amountPaid: parseFloat(orderAmountPaidInput.value) || 0,
-                isPaid: orderIsPaidCheckbox.checked,
-                printType: orderPrintTypeSelect ? orderPrintTypeSelect.value : 'dtf',
-                // shirtType removido conforme solicitado
-                colors: colors,
-                printing: {
-                    images: activeDtfImages.slice(),
-                    total: parseInt(orderPrintQuantityInput?.value) || (checklist.printing && checklist.printing.total ? parseInt(checklist.printing.total) : 0),
-                    notes: orderPrintingNotesInput ? (orderPrintingNotesInput.value || '').trim() : ''
-                }
-            };
-            if (editingOrderId) {
-                const orderIndex = productionOrders.findIndex(o => o.id === editingOrderId);
-                productionOrders[orderIndex] = { ...productionOrders[orderIndex], ...orderData };
-            } else {
-                const newOrder = { id: Date.now(), status: 'todo', ...orderData };
-                productionOrders.push(newOrder);
+            } catch (err) {
+                console.error('Erro ao processar o formulário:', err);
+                alert('Não foi possível processar o formulário. Verifique os dados e tente novamente.');
+            } finally {
+                if (saveOrderBtn) saveOrderBtn.disabled = false;
             }
-            saveOrders();
-            renderKanban();
-            closeModal();
         });
     }
 
@@ -1198,5 +1222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             target.dispatchEvent(ev);
         }, true);
     } // end if (orderColorsContainer)
+
+    document.querySelectorAll('button').forEach(b => console.log(b.id, b.type));
 }); // end DOMContentLoaded
 //

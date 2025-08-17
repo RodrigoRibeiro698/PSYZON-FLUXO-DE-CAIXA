@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addClientBtn = document.getElementById('add-client-btn');
     const clientModal = document.getElementById('client-modal');
     const clientForm = document.getElementById('client-form');
+    const saveClientBtn = document.getElementById('save-client-btn');
     const clientModalTitle = document.getElementById('client-modal-title');
     const cancelClientBtn = document.getElementById('cancel-client-btn');
     const clientListEl = document.getElementById('client-list');
@@ -139,37 +140,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clientForm) {
         clientForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const clientName = clientNameInput ? clientNameInput.value.trim() : '';
-            if (!clientName) { alert('O nome do cliente não pode estar vazio.'); return; }
+            if (!saveClientBtn) return;
 
-            const clientData = {
-                name: clientName,
-                gender: clientGenderSelect ? clientGenderSelect.value : 'not_informed',
-                phone: clientPhoneInput ? clientPhoneInput.value.trim() : '',
-                email: clientEmailInput ? clientEmailInput.value.trim() : '',
-            };
-            if (tempClientPhotoData) clientData.clientPhotoData = tempClientPhotoData;
-            if (tempProductPhotoData) clientData.productPhotoData = tempProductPhotoData;
-
+            saveClientBtn.disabled = true;
             try {
-                if (editingClientId) {
-                    await fetch(`${apiBaseUrl}/clients/${editingClientId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(clientData)
-                    });
-                } else {
-                    await fetch(`${apiBaseUrl}/clients`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(clientData)
-                    });
+                const fd = new FormData(clientForm);
+                const payload = Object.fromEntries(fd.entries());
+                // converter campos numéricos se necessário
+                const res = await fetch(`${apiBaseUrl}/clients`, {
+                    method: payload.id ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                    const txt = await res.text().catch(()=>res.statusText);
+                    console.error('/api/clients error', res.status, txt);
+                    alert('Erro ao salvar cliente: ' + (txt || res.status));
+                    return;
                 }
                 await fetchData();
-                closeModal();
-            } catch (error) {
-                console.error("Falha ao salvar cliente:", error);
-                alert("Erro ao salvar cliente.");
+                closeModal && closeModal();
+            } catch (err) {
+                console.error('Erro no submit client:', err);
+                alert('Erro de conexão ao salvar cliente.');
+            } finally {
+                saveClientBtn.disabled = false;
             }
         });
     }

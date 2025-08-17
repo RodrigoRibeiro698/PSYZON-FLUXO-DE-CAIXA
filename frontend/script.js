@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
         const isProductSale = typeInput.value === 'income' && categoryInput.value === 'Venda de Produto';
         if (!descriptionInput.value.trim() || !amountInput.value.trim() || !dateInput.value) { alert('Por favor, preencha todos os campos obrigatórios.'); return; }
@@ -199,6 +199,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const amount = typeInput.value === 'expense' ? -Math.abs(parseFloat(amountInput.value)) : parseFloat(amountInput.value);
         
+        // Prepara os dados da transação
         const transactionData = {
             name: nameInput.value.trim(),
             description: descriptionInput.value.trim(),
@@ -208,48 +209,50 @@ document.addEventListener('DOMContentLoaded', async () => {
             category: categoryInput.value,
             scope: typeInput.value === 'expense' ? selectedScope : null,
             clientId: linkClientCheckbox.checked && clientSelect.value ? parseInt(clientSelect.value) : null,
-            quantity: 0,
-            weightKg: 0,
-            fabricColor: null
+            quantity: isProductSale ? parseInt(quantityInput.value, 10) || 0 : 0,
+            weightKg: isFabricCheckbox.checked ? parseFloat(fabricWeightInput.value) || 0 : 0,
+            fabricColor: isFabricCheckbox.checked ? fabricColorInput.value.trim() || null : null
         };
 
-        if (isProductSale) {
-            transactionData.quantity = parseInt(quantityInput.value, 10) || 0;
-        }
-        if (isFabricCheckbox.checked) {
-            transactionData.weightKg = parseFloat(fabricWeightInput.value) || 0;
-            transactionData.fabricColor = fabricColorInput.value.trim() || null;
-        }
-
-        let newTransactionId = null;
-        if (editingId) {
-            const transactionIndex = transactions.findIndex(t => t.id === editingId);
-            if (transactionIndex > -1) {
-                transactions[transactionIndex] = { ...transactions[transactionIndex], ...transactionData };
+        try {
+            let savedTransaction;
+            if (editingId) {
+                // Se estiver editando, envia um PUT para a API
+                const response = await fetch(`${apiBaseUrl}/transactions/${editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(transactionData)
+                });
+                savedTransaction = await response.json();
+            } else {
+                // Se for novo, envia um POST para a API
+                const response = await fetch(`${apiBaseUrl}/transactions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(transactionData)
+                });
+                savedTransaction = await response.json();
             }
-        } else {
-            const newTransaction = { ...transactionData, id: Date.now() };
-            transactions.push(newTransaction);
-            newTransactionId = newTransaction.id;
-            if (isProductSale) {
-                updateMonthlyProduction(newTransaction.date.substring(0, 7), newTransaction.quantity);
-            }
-        }
-        
-        saveTransactions();
-        updateUI();
-        closeModal();
 
-        const isLinkedProductSale = isProductSale && transactionData.clientId;
-        if (isLinkedProductSale && newTransactionId) {
-            setTimeout(() => {
-                if (confirm("Venda registrada com sucesso! Deseja criar um pedido de produção para este item na aba 'Processos'?")) {
-                    const client = clients.find(c => c.id === transactionData.clientId);
-                    const prefillData = { description: transactionData.description, clientId: transactionData.clientId };
-                    localStorage.setItem('prefill_order_form', JSON.stringify(prefillData));
-                    window.location.href = 'processos.html?action=new_order';
-                }
-            }, 500);
+            // Atualiza a UI buscando os dados mais recentes do servidor
+            await fetchData(); 
+            closeModal();
+
+            // Lógica para criar pedido de produção (já estava correta)
+            const isLinkedProductSale = isProductSale && transactionData.clientId;
+            if (isLinkedProductSale && !editingId) {
+                setTimeout(() => {
+                    if (confirm("Venda registrada com sucesso! Deseja criar um pedido de produção para este item na aba 'Processos'?")) {
+                        const client = clients.find(c => c.id === transactionData.clientId);
+                        const prefillData = { description: transactionData.description, clientId: transactionData.clientId };
+                        localStorage.setItem('prefill_order_form', JSON.stringify(prefillData));
+                        window.location.href = 'processos.html?action=new_order';
+                    }
+                }, 500);
+            }
+        } catch (error) {
+            console.error('Erro ao salvar transação:', error);
+            alert('Ocorreu um erro ao salvar a transação. Por favor, tente novamente.');
         }
     };
 
