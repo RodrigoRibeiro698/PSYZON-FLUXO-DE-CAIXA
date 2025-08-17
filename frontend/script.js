@@ -550,3 +550,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(checkDeadlinesAndNotify, 2000);
     fetch('/api/transactions').then(r => r.text()).then(t => console.log(t)).catch(e=>console.error(e))
 });
+
+// exemplo: expor função para chamar o Gemini generate a partir do console ou UI
+window.generateIdeas = async (prompt) => {
+  try {
+    const r = await fetch('/api/generate-ideas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const json = await r.json();
+    console.log('AI result:', json);
+    return json;
+  } catch (err) {
+    console.error('AI generate error', err);
+    throw err;
+  }
+};

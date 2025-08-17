@@ -4,12 +4,25 @@ const multer = require('multer');
 require('dotenv').config();
 const { Firestore } = require('@google-cloud/firestore');
 const { Storage } = require('@google-cloud/storage');
+// adiciona cliente Gemini (opcional, só inicializa se tiver a chave)
+let genAI = null;
+try {
+  const { GoogleGenerativeAI } = require('@google/generative-ai');
+  if (process.env.GEMINI_API_KEY) {
+    // inicializa cliente (biblioteca espera apiKey)
+    genAI = new GoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
+    console.log('Gemini client inicializado.');
+  } else {
+    console.log('GEMINI_API_KEY não definida — Gemini endpoints estarão desabilitados.');
+  }
+} catch (e) {
+  console.warn('@google/generative-ai não instalado ou falha ao require — endpoints Gemini ficarão desabilitados.', e.message);
+}
 
 let firestoreConfig = {};
 if (process.env.GOOGLE_CREDENTIALS_JSON) {
   try {
     firestoreConfig = { credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON) };
-    // optionally set projectId if missing in credentials
     if (!firestoreConfig.projectId && firestoreConfig.credentials && firestoreConfig.credentials.project_id) {
       firestoreConfig.projectId = firestoreConfig.credentials.project_id;
     }
@@ -132,9 +145,85 @@ app.delete('/api/orders/:id', async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// exporta o app para o runtime serverless (Vercel) e, apenas se rodando diretamente, inicia o listener local
-module.exports = app;
+// ---- NEW: Gemini text generation endpoint ----
+app.post('/api/generate-ideas', async (req, res) => {
+  const { prompt, maxTokens = 300 } = req.body || {};
+  if (!prompt) return res.status(400).json({ error: 'prompt is required' });
+  if (!genAI) return res.status(500).json({ error: 'Gemini client not configured (GEMINI_API_KEY missing or lib not installed).' });
 
+  try {
+    // usa a API de geração se disponível na lib
+    const model = genAI.getGenerativeModel ? genAI.getGenerativeModel({ model: 'gemini-1.5-flash' }) : null;
+    if (!model || typeof model.generate !== 'function') {
+      return res.status(500).json({ error: 'Generative model not available with current SDK.' });
+    }
+
+    const result = await model.generate({
+      prompt: { text: prompt },
+      temperature: 0.7,
+      maxOutputTokens: maxTokens
+    });
+
+    // tenta extrair texto de forma genérica
+    let text = null;
+    if (result && result.candidates && result.candidates[0] && result.candidates[0].content) {
+      text = result.candidates[0].content;
+    } else if (result && result.output) {
+      text = JSON.stringify(result.output);
+    } else {
+      text = JSON.stringify(result);
+    }
+
+    res.json({ text });
+  } catch (err) {
+    console.error('Gemini generate error:', err);
+    res.status(500).json({ error: err.message || String(err) });
+  }
+});
+
+// ---- NEW: Upload + analyze-image (faz upload ao GCS e retorna URL; análise com Gemini é opcional) ----
+app.post('/api/analyze-image', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
+
+    // salva no GCS
+    const name = `${Date.now()}-${req.file.originalname.replace(/\s+/g,'_')}`;
+    const file = bucket.file(name);
+    await file.save(req.file.buffer, {
+      resumable: false,
+      contentType: req.file.mimetype,
+      metadata: { cacheControl: 'public, max-age=31536000' }
+    });
+    await file.makePublic();
+    const publicUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${encodeURIComponent(name)}`;
+
+    // opção: tentar análise se genAI está disponível (observação: análise multimodal depende da SDK/API)
+    if (genAI && genAI.getGenerativeModel) {
+      try {
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-image' });
+        if (model && typeof model.generate === 'function') {
+          // tentativa genérica de análise — algumas SDKs podem esperar outro formato
+          const analysis = await model.generate({
+            prompt: { text: `Analise a imagem em: ${publicUrl}. Liste itens detectados e possíveis descrições.` },
+            maxOutputTokens: 300
+          });
+          return res.status(201).json({ url: publicUrl, analysis: analysis?.candidates?.[0]?.content || analysis });
+        }
+      } catch (aiErr) {
+        console.warn('Gemini image analysis failed (non-fatal):', aiErr.message || aiErr);
+      }
+    }
+
+    // fallback: retorna apenas a URL do upload
+    res.status(201).json({ url: publicUrl });
+  } catch (error) {
+    console.error('Upload/analyze error', error);
+    res.status(500).json({ error: error.message || String(error) });
+  }
+});
+
+// export app for serverless (Vercel). Only listen when run locally.
+module.exports = app;
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
