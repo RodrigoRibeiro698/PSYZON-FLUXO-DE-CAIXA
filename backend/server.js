@@ -5,9 +5,25 @@ require('dotenv').config();
 const { Firestore } = require('@google-cloud/firestore');
 const { Storage } = require('@google-cloud/storage');
 
-const firestore = new Firestore();
-const storage = new Storage();
-const bucket = storage.bucket('psyzon-dashboard-arquivos-rodrigo');
+let firestoreConfig = {};
+if (process.env.GOOGLE_CREDENTIALS_JSON) {
+  try {
+    firestoreConfig = { credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON) };
+    // optionally set projectId if missing in credentials
+    if (!firestoreConfig.projectId && firestoreConfig.credentials && firestoreConfig.credentials.project_id) {
+      firestoreConfig.projectId = firestoreConfig.credentials.project_id;
+    }
+  } catch (e) {
+    console.error('Failed to parse GOOGLE_CREDENTIALS_JSON env var:', e);
+  }
+}
+
+// fallback: if running locally and GOOGLE_APPLICATION_CREDENTIALS points to a file, let client lib pick it up (no config)
+const firestore = new Firestore(Object.keys(firestoreConfig).length ? firestoreConfig : undefined);
+const storage = new Storage(Object.keys(firestoreConfig).length ? firestoreConfig : undefined);
+
+const BUCKET_NAME = process.env.BUCKET_NAME || 'psyzon-dashboard-arquivos-rodrigo';
+const bucket = storage.bucket(BUCKET_NAME);
 
 const app = express();
 app.use(cors());

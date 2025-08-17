@@ -56,21 +56,47 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // busca inicial do servidor
     const fetchData = async () => {
-        try {
-            const [transRes, clientsRes, ordersRes] = await Promise.all([
-                fetch(`${apiBaseUrl}/transactions`),
-                fetch(`${apiBaseUrl}/clients`),
-                fetch(`${apiBaseUrl}/orders`)
-            ]);
-            transactions = await transRes.json();
-            clients = await clientsRes.json();
-            productionOrders = await ordersRes.json();
-            updateUI();
-        } catch (error) {
-            console.error("Falha ao carregar dados iniciais:", error);
-            alert("Não foi possível conectar ao servidor. Verifique se ele está rodando.");
-        }
-    };
+  try {
+    const [transRes, clientsRes, ordersRes] = await Promise.all([
+      fetch(`${apiBaseUrl}/transactions`),
+      fetch(`${apiBaseUrl}/clients`),
+      fetch(`${apiBaseUrl}/orders`)
+    ]);
+
+    // melhor debug: logar resposta bruta quando não ok
+    if (!transRes.ok) {
+      const txt = await transRes.text().catch(()=>'<no-body>');
+      console.error('/api/transactions returned non-200:', transRes.status, txt);
+    }
+    if (!clientsRes.ok) {
+      const txt = await clientsRes.text().catch(()=>'<no-body>');
+      console.error('/api/clients returned non-200:', clientsRes.status, txt);
+    }
+    if (!ordersRes.ok) {
+      const txt = await ordersRes.text().catch(()=>'<no-body>');
+      console.error('/api/orders returned non-200:', ordersRes.status, txt);
+    }
+
+    const transJson = await transRes.json().catch(()=>null);
+    const clientsJson = await clientsRes.json().catch(()=>null);
+    const ordersJson = await ordersRes.json().catch(()=>null);
+
+    transactions = Array.isArray(transJson) ? transJson : [];
+    clients = Array.isArray(clientsJson) ? clientsJson : [];
+    productionOrders = Array.isArray(ordersJson) ? ordersJson : [];
+
+    // se houve erro no servidor, avisar sem travar a UI
+    if (!Array.isArray(transJson)) {
+      console.warn('Using empty transactions fallback due to server response.');
+      // opcional: mostrar notificação ao usuário
+    }
+
+    updateUI();
+  } catch (error) {
+    console.error("Falha ao carregar dados iniciais:", error);
+    alert("Não foi possível conectar ao servidor. Verifique os logs do backend.");
+  }
+};
 
     const saveTransactions = () => localStorage.setItem('transactions', JSON.stringify(transactions));
     const formatCurrency = (amount) => amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
