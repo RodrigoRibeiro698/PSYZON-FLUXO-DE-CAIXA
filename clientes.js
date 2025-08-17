@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const apiBaseUrl = 'http://localhost:3000/api'; // Endereço do seu servidor
+    const apiBaseUrl = '/api'; // 
 
     const addClientBtn = document.getElementById('add-client-btn');
     const clientModal = document.getElementById('client-modal');

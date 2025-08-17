@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const apiBaseUrl = 'http://localhost:3000/api'; // ajuste para sua API
+    const apiBaseUrl = '/api'; // 
 
     const addOrderBtn = document.getElementById('add-order-btn');
     const tabQuadro = document.getElementById('tab-quadro');

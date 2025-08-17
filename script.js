@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const apiBaseUrl = 'http://localhost:3000/api'; // substitua pela URL do seu backend em produção
+    const apiBaseUrl = '/api'; // substitua pela URL do seu backend em produção
 
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');

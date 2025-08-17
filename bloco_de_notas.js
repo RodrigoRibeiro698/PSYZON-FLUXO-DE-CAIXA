@@ -1,16 +1,7 @@
-/*
-  Bloco de notas — versão modernizada
-  - melhor estrutura de dados (tags, color, checklist)
-  - debounce/autosave + save que usa File System Access quando disponível
-  - undo/redo stack (editor)
-  - checklist sincronizado bidirecional com o conteúdo (- [ ] / - [x])
-  - drag & drop robusto para checklist
-  - event delegation, menos repetição, mais previsível
-  - pequenas melhorias de UX: keyboard shortcuts, copy/share, toast
-*/
+
 document.addEventListener('DOMContentLoaded', () => {
   'use strict';
-
+const apiBaseUrl = '/api'; // 
   /* Config */
   const LS_KEY = 'psyzon_notes_v3';
   const LS_ACTIVE = 'psyzon_active_note_v3';

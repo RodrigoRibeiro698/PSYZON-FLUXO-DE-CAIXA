@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const apiBaseUrl = '/api'; // 
     const incomeList = document.getElementById('income-categories-list');
     const expenseList = document.getElementById('expense-categories-list');
     const newIncomeCategoryInput = document.getElementById('new-income-category');

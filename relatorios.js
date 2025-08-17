@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const apiBaseUrl = '/api'; // 
     const startDateInput = document.getElementById('start-date');
     const endDateInput = document.getElementById('end-date');
     const typeFilter = document.getElementById('type-filter');

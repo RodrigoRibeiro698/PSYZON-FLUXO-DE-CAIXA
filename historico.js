@@ -2,8 +2,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   'use strict';
 
-  const apiBaseUrl = 'http://localhost:3000/api'; // ajuste para produção
-
+  const apiBaseUrl = '/api'; // URL base da API
   // DOM refs
   const monthSelector = document.getElementById('month-selector');
   const balanceEl = document.getElementById('balance');
