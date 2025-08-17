@@ -522,4 +522,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- INICIALIZAÇÃO ---
     await fetchData();
     setTimeout(checkDeadlinesAndNotify, 2000);
+    fetch('/api/transactions').then(r => r.text()).then(t => console.log(t)).catch(e=>console.error(e))
 });
